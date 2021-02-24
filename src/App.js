@@ -19,8 +19,9 @@ import {routerReducer} from 'react-router-redux';
 import { createBrowserHistory } from 'history';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux'
-import RestaurantList from './components/customer/RestaurantList';
 import CustomerMenuBar from './components/customer/CustomerMenuBar';
+import CustomerFavorites from './components/customer/CustomerFavorites';
+import CustomerOldOrders from './components/customer/CustomerOldOrders';
 import CustomerProfile from './components/customer/CustomerProfile';
 
 class App extends React.Component {
@@ -38,11 +39,14 @@ class App extends React.Component {
                             {//<Switch>
                             }
                                 <Route path="/" exact component={MainMenu} /> 
-                                <Route path="/customer" component={CustomerMenuBar} />
-                                <Route path="/courier" component={MainCourierPage} />
-                                <Route path="/restaurant" component={MainRestaurantPage} />
+                                <Route path="/customer" component={CustomerMenuBar} /> 
                                 <Route path="/customer/main" exact component={MainCustomerPage} />
                                 <Route path="/customer/profile" exact component={CustomerProfile} />
+                                <Route path="/customer/orders" exact component={CustomerOldOrders} />
+                                <Route path="/customer/favorites" exact component={CustomerFavorites} />
+                                <Route path="/courier" component={MainCourierPage} />
+                                <Route path="/restaurant" component={MainRestaurantPage} />
+                               
                             {//</Switch>
                             }
                         </div>
