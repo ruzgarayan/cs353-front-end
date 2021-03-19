@@ -1,64 +1,50 @@
 import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
+import {connect} from 'react-redux';
+import axios from "axios";
 
 import React from 'react';
-import {Button} from 'primereact/button';
-import {InputText} from 'primereact/inputtext';
-import {Calendar} from 'primereact/calendar';
-import { InputTextarea } from 'primereact/inputtextarea';
-import './customerStyle.css'
 
 
 class CustomerProfile extends React.Component
 {
+    state = {
+        loading: true,
+        userData: null
+    };
+
+    componentDidMount()
+    {
+        axios.get("https://60376f1f54350400177225f6.mockapi.io/cs353/user").then((result) => {
+            this.setState({userData: result.data[0], loading: false});
+        }).catch((error) => {
+            console.log(error);
+            //TODO
+        });
+    }
+
     render() {
-        return (
-            <div> This is my profile.
-            {/*
-            <div>
-                <br/>
-    
-                <div className="p-fluid">
-                    <div className="p-field">
-                        <span className="p-float-label">
-                            <InputText type="text" value={this.state.eventName} onChange={(e) => this.setState({eventName: e.target.value})}/>
-                            <label>Etkinlik İsmi</label>
-                        </span>
-                    </div>
+        if (this.state.loading)
+        {
+            return (
+                <div> Loading... 
                 </div>
-    
-                <br/>
-    
-                <div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-6">
-                        <span className="p-float-label">
-                            <Calendar value={this.state.startingDate} onChange={(e) => this.setState({startingDate: e.value})} />
-                            <label>Başlangıç Tarihi</label>
-                        </span>
-                    </div>
-                    <div className="p-field p-col-12 p-md-6">
-                        <span className="p-float-label">
-                            <Calendar value={this.state.endingDate} onChange={(e) => this.setState({endingDate: e.value})} />
-                            <label>Bitiş Tarihi</label>
-                        </span>
-                    </div>
+            );
+        }
+        else
+        {
+            return (
+                <div> This is {this.state.userData.name}'s profile. 
                 </div>
-    
-                <br/>
-    
-                <div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-4">
-                        <span className="p-float-label">
-                            <InputText type="text" keyfilter="pint" value={this.state.totalQuota} onChange={(e) => this.setState({totalQuota: e.target.value})} />
-                            <label >Kontenjan</label>
-                        </span>
-                    </div>
-                </div>
-            </div>    
-            */}
-             </div>
-        );
+            );
+        }
     }
 }
 
-export default CustomerProfile;
+const mapStateToProps = state => {  
+    console.log(state);
+    return {
+        loginInfo: state.loginInfo
+    };
+};
+export default connect(mapStateToProps)(CustomerProfile);

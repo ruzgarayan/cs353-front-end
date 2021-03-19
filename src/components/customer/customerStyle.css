@@ -4,7 +4,97 @@
     justify-content: space-between;
 }
 
-.datatable-templating-demo .product-image {
-    width: 100px;
+.datatable-templating-demo .restaurant-image {
+    width: 200px;
+    height: 200px;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+}
+
+.datascroller-demo .restaurant-name {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.datascroller-demo .restaurant-description {
+    margin: 0 0 1rem 0;
+}
+
+.datascroller-demo .restaurant-category-icon {
+    vertical-align: middle;
+    margin-right: .5rem;
+}
+
+.datascroller-demo .restaurant-category {
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.datascroller-demo .restaurant-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    width: 100%;
+}
+
+.datascroller-demo .restaurant-item img {
+    width: 400px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+    margin-right: 2rem;
+}
+
+.datascroller-demo .restaurant-item .restaurant-detail {
+    flex: 1 1 0;
+}
+
+.datascroller-demo .restaurant-item .p-rating {
+    margin: 0 0 .5rem 0;
+}
+
+.datascroller-demo .restaurant-item .restaurant-price {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: .5rem;
+    align-self: flex-end;
+}
+
+.datascroller-demo .restaurant-item .restaurant-action {
+    display: flex;
+    flex-direction: column;
+}
+
+.datascroller-demo .restaurant-item .p-button {
+    margin-bottom: .5rem;
+}
+
+@media screen and (max-width: 576px) {
+    .datascroller-demo .restaurant-item {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .datascroller-demo .restaurant-item img {
+        width: 75%;
+        margin: 2rem 0;
+    }
+
+    .datascroller-demo .restaurant-item .restaurant-detail {
+        text-align: center;
+    }
+
+    .datascroller-demo .restaurant-item .restaurant-price {
+        align-self: center;
+    }
+
+    .datascroller-demo .restaurant-item .restaurant-action {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .datascroller-demo .restaurant-item .restaurant-action {
+        margin-top: 2rem;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
 }

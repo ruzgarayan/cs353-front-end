@@ -9,27 +9,29 @@ import MainRestaurantPage from './components/restaurant/MainRestaurantPage';
 import MainCourierPage from './components/courier/MainCourierPage';
 import {
     BrowserRouter as Router,
-    Switch,
     Route,
-    Link
 } from "react-router-dom";
 
 import {routerReducer} from 'react-router-redux';
+import {loginInfo} from "./reducers/index"
 
 import { createBrowserHistory } from 'history';
 import { Provider } from 'react-redux';
-import { createStore } from 'redux'
+import { combineReducers, createStore } from 'redux'
 import CustomerMenuBar from './components/customer/CustomerMenuBar';
 import CustomerFavorites from './components/customer/CustomerFavorites';
 import CustomerOldOrders from './components/customer/CustomerOldOrders';
 import CustomerProfile from './components/customer/CustomerProfile';
+import RestaurantView from './components/customer/RestaurantView';
+import OrderDetails from './components/customer/OrderDetails';
 
 class App extends React.Component {
 
     render() {
 
         let history = createBrowserHistory();
-        let store = createStore(routerReducer);
+        let reducers = combineReducers({routerReducer, loginInfo});
+        let store = createStore(reducers);
 
         return (
             <div style={{ textAlign: "center" }}>
@@ -44,6 +46,8 @@ class App extends React.Component {
                                 <Route path="/customer/profile" exact component={CustomerProfile} />
                                 <Route path="/customer/orders" exact component={CustomerOldOrders} />
                                 <Route path="/customer/favorites" exact component={CustomerFavorites} />
+                                <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
+                                <Route path="/customer/orderDetails/:id" exact component={OrderDetails} />
                                 <Route path="/courier" component={MainCourierPage} />
                                 <Route path="/restaurant" component={MainRestaurantPage} />
                                

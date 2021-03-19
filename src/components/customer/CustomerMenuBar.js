@@ -4,7 +4,6 @@ import 'primereact/resources/primereact.css';
 import React from 'react';
 import { Menubar } from 'primereact/menubar';
 import { InputText } from 'primereact/inputtext';
-import { Router } from 'react-router-dom';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
 
@@ -14,6 +13,11 @@ class CustomerMenuBar extends React.Component
     render() {
 
         const items = [
+            {
+                label: 'Restaurants',
+                icon: 'pi pi-fw pi-sitemap',
+                command: () => { this.props.history.push('/customer/main'); }
+            },
             {
                 label: 'Profile',
                 icon: 'pi pi-fw pi-user',
@@ -56,3 +60,12 @@ const mapDispatchToProps = {
 CustomerMenuBar = withRouter(connect(null,mapDispatchToProps)(CustomerMenuBar))
 
 export default CustomerMenuBar;
+
+/*
+const mapStateToProps = state => {  
+    return {
+        history: state.history
+    };
+};
+export default connect(mapStateToProps)(CustomerMenuBar);
+*/
