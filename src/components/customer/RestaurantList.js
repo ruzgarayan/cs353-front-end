@@ -8,7 +8,8 @@ import { Rating } from 'primereact/rating';
 import { DataScroller } from 'primereact/datascroller';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
-import './customerStyle.css'
+import { ProgressSpinner } from 'primereact/progressspinner';
+import './styles/customerStyle.css'
 
 class RestaurantList extends React.Component {
 
@@ -36,7 +37,7 @@ class RestaurantList extends React.Component {
         const itemTemplate = (data) => {
             return (
                 <div className="restaurant-item">
-                    <img src={`https://lh3.googleusercontent.com/proxy/rYy3zhdtwQueXVNfG8YnZe_Iah2uV0ZahMiyWmzxDOb6tZPh0ZYOTzkJ4dXN1sM0dCH6updAs104Xak37p_jg59c1L_6IJ-N1sq0A_68Ae0lF8nPh3Ui`} alt="" />
+                    <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" />
                     <div className="restaurant-detail">
                         <div className="restaurant-name">{data.name}</div>
                         <div className="restaurant-description">{data.description}</div>
@@ -53,8 +54,7 @@ class RestaurantList extends React.Component {
         if (this.state.loading)
         {
             return (
-                <div> Loading... 
-                </div>
+                <ProgressSpinner/>
             );
         }
         else

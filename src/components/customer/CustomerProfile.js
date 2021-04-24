@@ -2,6 +2,7 @@ import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 import {connect} from 'react-redux';
 import axios from "axios";
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 import React from 'react';
 
@@ -27,8 +28,7 @@ class CustomerProfile extends React.Component
         if (this.state.loading)
         {
             return (
-                <div> Loading... 
-                </div>
+                <ProgressSpinner/>
             );
         }
         else

@@ -9,6 +9,7 @@ import { TabView,TabPanel } from 'primereact/tabview';
 import { Button } from 'primereact/button';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 
 class ActiveOrders extends React.Component {
@@ -37,8 +38,7 @@ class ActiveOrders extends React.Component {
         if (this.state.loading)
         {
             return (
-                <div> Loading... 
-                </div>
+                <ProgressSpinner/>
             );
         }
         else
