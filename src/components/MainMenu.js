@@ -7,24 +7,41 @@ import { Button } from 'primereact/button';
 import {
     Link
 } from "react-router-dom";
+import LoginPage from './login-register/LoginPage';
+import RegisterPage from './login-register/RegisterPage';
+import 'primeflex/primeflex.css';
 
 class MainMenu extends React.Component {
+
+    state = {
+        login: true
+    }
+
     render() {
-        return (
-            <div>
-                    <Link to="/customer/main">
-                        <Button icon="pi pi-user" label={"Customer Login"} />
-                    </Link>
-                    <br /> <br />
-                    <Link to="/courier/main">
-                        <Button icon="pi pi-user" label={"Courier Login"} />
-                    </Link>
-                    <br /> <br />
-                    <Link to="/restaurant/main">
-                        <Button icon="pi pi-user" label={"Restaurant Login"} />
-                    </Link>
-            </div>
-        );
+
+        if (this.state.login)
+        {
+            return (
+                <div>
+                    <Button label="Login" className="p-button-success" onClick={() => this.setState({login: true})} style={{marginRight: '10px'}}/>
+                    <Button label="Register" onClick={() => this.setState({login: false})}/>
+                    <br/><br/><br/><br/><br/><br/>
+                    <LoginPage/>
+                </div>
+            );
+        }
+        else 
+        {
+            return (
+                <div>
+                    <Button label="Login" onClick={() => this.setState({login: true})} style={{marginRight: '10px'}}/>
+                    <Button label="Register" className="p-button-success" onClick={() => this.setState({login: false})}/>
+                    <br/><br/><br/><br/><br/><br/>
+                    <RegisterPage/>
+                </div>
+            );
+        }
+        
     }
 }
 
