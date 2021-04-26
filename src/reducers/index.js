@@ -1,7 +1,7 @@
 
 const INITIAL_LOGIN_INFO = {
     loggedIn: false,
-    username: null,
+    userInfo: null,
     token: null
 }
 

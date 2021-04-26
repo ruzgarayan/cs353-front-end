@@ -25,7 +25,7 @@ class MainMenu extends React.Component {
                 <div>
                     <Button label="Login" className="p-button-success" onClick={() => this.setState({login: true})} style={{marginRight: '10px'}}/>
                     <Button label="Register" onClick={() => this.setState({login: false})}/>
-                    <br/><br/><br/><br/><br/><br/>
+                    <br/><br/>
                     <LoginPage/>
                 </div>
             );
@@ -36,7 +36,7 @@ class MainMenu extends React.Component {
                 <div>
                     <Button label="Login" onClick={() => this.setState({login: true})} style={{marginRight: '10px'}}/>
                     <Button label="Register" className="p-button-success" onClick={() => this.setState({login: false})}/>
-                    <br/><br/><br/><br/><br/><br/>
+                    <br/><br/>
                     <RegisterPage/>
                 </div>
             );

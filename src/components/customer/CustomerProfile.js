@@ -3,6 +3,8 @@ import 'primereact/resources/primereact.css';
 import {connect} from 'react-redux';
 import axios from "axios";
 import { ProgressSpinner } from 'primereact/progressspinner';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
 
 import React from 'react';
 
@@ -11,20 +13,24 @@ class CustomerProfile extends React.Component
 {
     state = {
         loading: true,
-        userData: null
+
+        userInfo: {
+            username: "",
+            password: "",
+            name: "",
+            surname: "",
+            telephone: "",
+            email: ""
+        },
+        
     };
 
     componentDidMount()
     {
-        axios.get("https://60376f1f54350400177225f6.mockapi.io/cs353/user").then((result) => {
-            this.setState({userData: result.data[0], loading: false});
-        }).catch((error) => {
-            console.log(error);
-            //TODO
-        });
+        this.setState({userInfo: this.props.loginInfo.userInfo, loading: false});
     }
 
-    render() {
+    render() { 
         if (this.state.loading)
         {
             return (
@@ -33,16 +39,38 @@ class CustomerProfile extends React.Component
         }
         else
         {
+            console.log(this.props);
             return (
-                <div> This is {this.state.userData.name}'s profile. 
+
+                <div className="p-fluid p-formgrid p-grid">
+                    <div className="p-field p-col-12 p-md-3">
+
+                    </div>
+
+                    <div className="p-field p-col-12 p-md-6" style={{'border-style': 'solid'}}>
+
+                        <div className="p-float-label" style={{'margin-top': '30px'}}>
+                            <InputText id="username" type="text" value={this.state.userInfo.username}
+                                onChange={(e) => this.setState({ userInfo: {...this.state.userInfo, username: e.target.value }})} />
+                            <label>Username</label>
+                        </div>
+                        <div className="p-float-label" style={{'margin-top': '30px'}}>
+                            <InputText id="username" type="text" value={this.state.username}
+                                onChange={(e) => this.setState({ username: e.target.value })} />
+                            <label>Username</label>
+                        </div>
+
+                        
+                        <br />
+                    </div>
                 </div>
+
             );
         }
     }
 }
 
-const mapStateToProps = state => {  
-    console.log(state);
+const mapStateToProps = state => { 
     return {
         loginInfo: state.loginInfo
     };

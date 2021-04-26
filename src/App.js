@@ -1,6 +1,7 @@
 import 'primeicons/primeicons.css';
 import 'primereact/resources/themes/nova/theme.css';
 import 'primereact/resources/primereact.css';
+import 'primeflex/primeflex.css';
 
 import React from 'react';
 import MainMenu from './components/MainMenu';
