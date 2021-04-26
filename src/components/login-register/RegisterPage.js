@@ -6,6 +6,9 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
 import { RadioButton } from 'primereact/radiobutton';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { ScrollPanel } from 'primereact/scrollpanel';
+import { ListBox } from 'primereact/listbox';
 
 import {
     Link
@@ -28,27 +31,81 @@ class RegisterPage extends React.Component {
             surname: "",
             telephone: "",
             email: "",
-            userType: this.userTypes[0]
+            userType: this.userTypes[0],
+
+            address: "",
+            selectedRegion: {id: 1, region_name: "Batikent"},
+
+            regions: [{id: 1, region_name: "Batikent"}, {id: 2, region_name: "Ostim"}, {id: 3, region_name: "Batikent"}, {id: 4, region_name: "Batikent"}, {id: 5, region_name: "Batikent"},],
         };
 
     }
 
 
     register() {
-        let registerInfo = this.state;
-        console.log(this.state.userType);
-        registerInfo.userType = registerInfo.userType.name;
-        console.log(registerInfo);
 
-        axios.post("/register", registerInfo).then((result) => {
+        let registerInfo = {
+            username: this.state.username,
+            password: this.state.password,
+            name: this.state.name,
+            surname: this.state.surname,
+            telephone: this.state.telephone,
+            email: this.state.email,
+            userType: this.state.userType.name
+        }
+        
+        let url = "";
+        if (registerInfo.userType === "Customer") 
+        {
+            registerInfo = {
+                ...registerInfo, 
+                address: this.state.address,
+                region_id: this.state.selectedRegion.id
+            }
+            url = "/registerCustomer";
+        }
+        else if (registerInfo.userType === "Courier") {
+            url = "/registerCourier";
+        }
+        else if (registerInfo.userType === "Restaurant Owner") {
+            url = "/registerRestaurantOwner";
+        }
+
+        axios.post(url, registerInfo).then((result) => {
             if (result.data.success)
                 toast.success(result.data.message);
             else
                 toast.error(result.data.message);
         }).catch((error) => {
-            console.log(error);
             toast.error("Error during the connection.");
         });
+    }
+
+    renderUserTypeSpecific() {
+        switch(this.state.userType.name) {
+            case 'Customer':
+                return (
+                    <div> 
+                            <div className="p-float-label" style={{'margin-top': '30px'}}>
+                                    <InputTextarea id="address" type="text" value={this.state.address} autoResize 
+                                        onChange={(e) => this.setState({ address: e.target.value })} />
+                                    <label>Address</label>
+                            </div>
+                            <h4> Region </h4>
+                            <div>
+                                <ScrollPanel style={{'width': '100%', 'height': '150px', 'margin-top': '25px'}}>
+                                    <ListBox optionLabel="region_name" value={this.state.selectedRegion}
+                                    options={this.state.regions} onChange={(e) => this.setState({selectedRegion: e.value})} />
+                                </ScrollPanel>
+                            </div>
+                            <br/>
+                    </div>
+                );
+            case 'Courier':
+                return (<div> </div>);
+            case 'Restaurant Owner':
+                return (<div> </div>);
+        }
     }
 
     render() {
@@ -135,6 +192,14 @@ class RegisterPage extends React.Component {
                         )
                     })
                 }
+
+                <div className="p-fluid p-formgrid p-grid">
+                    <div className="p-field p-col-12 p-md-5"></div>
+
+                    <div className="p-field p-col-12 p-md-2">
+                        {this.renderUserTypeSpecific()}
+                    </div>
+                </div>
                 
                 <div className="p-fluid p-formgrid p-grid">
                     <div className="p-field p-col-12 p-md-5"></div>
