@@ -20,7 +20,7 @@ class RestaurantList extends React.Component {
 
     
     fetchData() {
-        axios.get("/allRestaurants").then((result) => {
+        axios.get("/customer/allRestaurants").then((result) => {
             console.log(result);
             this.setState({restaurants: result.data.data, loading:false});
         }).catch((error) => {
