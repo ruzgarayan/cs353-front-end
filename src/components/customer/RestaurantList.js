@@ -20,9 +20,9 @@ class RestaurantList extends React.Component {
 
     
     fetchData() {
-        axios.get("https://60376f1f54350400177225f6.mockapi.io/cs353/restaurants").then((result) => {
+        axios.get("/allRestaurants").then((result) => {
             console.log(result);
-            this.setState({restaurants: result.data, loading:false});
+            this.setState({restaurants: result.data.data, loading:false});
         }).catch((error) => {
             console.log("Error");
             //TODO
@@ -39,13 +39,13 @@ class RestaurantList extends React.Component {
                 <div className="restaurant-item">
                     <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" />
                     <div className="restaurant-detail">
-                        <div className="restaurant-name">{data.name}</div>
+                        <div className="restaurant-name">{data.restaurant_name}</div>
                         <div className="restaurant-description">{data.description}</div>
                         <Rating value={data.rating} readOnly cancel={false}></Rating>
-                        <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.category}</span>
+                        <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.restaurant_category}</span>
                     </div>
                     <div className="restaurant-action">
-                        <Button icon="pi pi-shopping-cart" label="Enter" onClick= {() => { this.props.history.push('/customer/restaurantPage/' + data.id);}}></Button>
+                        <Button icon="pi pi-shopping-cart" label="Enter" onClick= {() => { this.props.history.push('/customer/restaurantPage/' + data.restaurantId);}}></Button>
                     </div>
                 </div>
             );
