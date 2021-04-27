@@ -10,6 +10,7 @@ import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
 import { ProgressSpinner } from 'primereact/progressspinner';
 import './styles/customerStyle.css'
+import { toast } from 'react-toastify';
 
 class RestaurantList extends React.Component {
 
@@ -24,8 +25,8 @@ class RestaurantList extends React.Component {
             console.log(result);
             this.setState({restaurants: result.data.data, loading:false});
         }).catch((error) => {
-            console.log("Error");
-            //TODO
+            toast.error("Error during the connection.");
+            this.fetchData();
         });
     }
 
@@ -60,12 +61,20 @@ class RestaurantList extends React.Component {
         else
         {
             return (
-                <div className="datascroller-demo">
-                    <div className="card">
-                        <DataScroller value={this.state.restaurants} itemTemplate={itemTemplate}
-                            rows={6} buffer={0.4} header="List of Restaurants" />
+                <div className="p-fluid p-formgrid p-grid">
+                    <div className="p-field p-col-12 p-md-3" >
+                        
+                    </div>
+                    <div className="p-field p-col-12 p-md-9" >
+                        <div className="datascroller-demo">
+                            <div className="card">
+                                <DataScroller value={this.state.restaurants} itemTemplate={itemTemplate}
+                                    rows={6} buffer={0.4} header="List of Restaurants" />
+                            </div>
+                        </div>
                     </div>
                 </div>
+                
             );
         }
 
