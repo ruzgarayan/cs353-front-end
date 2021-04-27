@@ -24,11 +24,6 @@ class CustomerMenuBar extends React.Component
                 command: () => { this.props.history.push('/customer/profile'); }
             },
             {
-                label: 'Favorite Restaurants',
-                icon: 'pi pi-fw pi-star',
-                command: () => { this.props.history.push('/customer/favorites'); }
-            },
-            {
                 label: 'Old orders',
                 icon: 'pi pi-fw pi-list',
                 command: () => { this.props.history.push('/customer/orders'); }
