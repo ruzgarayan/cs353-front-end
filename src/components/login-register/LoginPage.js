@@ -34,7 +34,7 @@ class LoginPage extends React.Component {
                 toast.success(result.data.message);
                 toast.success("Welcome, " + result.data.data.name + " " + result.data.data.surname);
 
-                this.props.loginInfo.userInfo = result.data.data;
+                this.props.loginInfo.userId = result.data.data.userId;
                 this.props.loginInfo.loggedIn = true;
 
                 if (result.data.data.userType == 'Customer')
