@@ -9,6 +9,7 @@ import { RadioButton } from 'primereact/radiobutton';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { ListBox } from 'primereact/listbox';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 import {
     Link
@@ -34,13 +35,33 @@ class RegisterPage extends React.Component {
             userType: this.userTypes[0],
 
             address: "",
-            selectedRegion: {id: 1, region_name: "Batikent"},
+            selectedRegion: null,
 
-            regions: [{id: 1, region_name: "Batikent"}, {id: 2, region_name: "Ostim"}, {id: 3, region_name: "Batikent"}, {id: 4, region_name: "Batikent"}, {id: 5, region_name: "Batikent"},],
+            regions: [],
+
+            loading: true
         };
 
     }
 
+    fetchData() {
+        axios.get("/region/allRegions").then((result) => {
+            if (!result.data.success)
+            {
+                toast.error("Error during the connection.");
+                this.fetchData();
+            }
+            else
+                this.setState({regions: result.data.data, selectedRegion: result.data.data[0], loading:false});
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+            this.fetchData();
+        });
+    }
+
+    componentDidMount() {
+        this.fetchData();
+    }
 
     register() {
 
@@ -60,7 +81,7 @@ class RegisterPage extends React.Component {
             registerInfo = {
                 ...registerInfo, 
                 address: this.state.address,
-                region_id: this.state.selectedRegion.id
+                region_id: this.state.selectedRegion.region_id
             }
             url = "/registerCustomer";
         }
@@ -71,6 +92,7 @@ class RegisterPage extends React.Component {
             url = "/registerRestaurantOwner";
         }
 
+        console.log(registerInfo);
         axios.post(url, registerInfo).then((result) => {
             if (result.data.success)
                 toast.success(result.data.message);
@@ -86,14 +108,14 @@ class RegisterPage extends React.Component {
             case 'Customer':
                 return (
                     <div> 
-                            <div className="p-float-label" style={{'margin-top': '30px'}}>
+                            <div className="p-float-label" style={{'marginTop': '30px'}}>
                                     <InputTextarea id="address" type="text" value={this.state.address} autoResize 
                                         onChange={(e) => this.setState({ address: e.target.value })} />
                                     <label>Address</label>
                             </div>
                             <h4> Region </h4>
                             <div>
-                                <ScrollPanel style={{'width': '100%', 'height': '150px', 'margin-top': '25px'}}>
+                                <ScrollPanel style={{'width': '100%', 'height': '150px', 'marginTop': '25px'}}>
                                     <ListBox optionLabel="region_name" value={this.state.selectedRegion}
                                     options={this.state.regions} onChange={(e) => this.setState({selectedRegion: e.value})} />
                                 </ScrollPanel>
@@ -109,108 +131,116 @@ class RegisterPage extends React.Component {
     }
 
     render() {
-        return (
-            <div>
-
-                <br /><div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        <span className="p-float-label">
-                            <InputText id="username" type="text" value={this.state.username}
-                                onChange={(e) => this.setState({ username: e.target.value })} />
-                            <label>Username</label>
-                        </span>
+        if (this.state.loading)
+        {
+            return (
+                <ProgressSpinner/>
+            );
+        }
+        else  {
+            return (
+                <div>
+    
+                    <br /><div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            <span className="p-float-label">
+                                <InputText id="username" type="text" value={this.state.username}
+                                    onChange={(e) => this.setState({ username: e.target.value })} />
+                                <label>Username</label>
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <br /><div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        <span className="p-float-label">
-                            <InputText id="password" type="password" value={this.state.password}
-                                onChange={(e) => this.setState({ password: e.target.value })} />
-                            <label>Password</label>
-                        </span>
+    
+                    <br /><div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            <span className="p-float-label">
+                                <InputText id="password" type="password" value={this.state.password}
+                                    onChange={(e) => this.setState({ password: e.target.value })} />
+                                <label>Password</label>
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <br /><div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-1">
-                        <span className="p-float-label">
-                            <InputText id="name" type="text" value={this.state.name}
-                                onChange={(e) => this.setState({ name: e.target.value })} />
-                            <label>Name</label>
-                        </span>
+    
+                    <br /><div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-1">
+                            <span className="p-float-label">
+                                <InputText id="name" type="text" value={this.state.name}
+                                    onChange={(e) => this.setState({ name: e.target.value })} />
+                                <label>Name</label>
+                            </span>
+                        </div>
+                        <div className="p-field p-col-12 p-md-1">
+                            <span className="p-float-label">
+                                <InputText id="surname" type="text" value={this.state.surname}
+                                    onChange={(e) => this.setState({ surname: e.target.value })} />
+                                <label>Surname</label>
+                            </span>
+                        </div>
                     </div>
-                    <div className="p-field p-col-12 p-md-1">
-                        <span className="p-float-label">
-                            <InputText id="surname" type="text" value={this.state.surname}
-                                onChange={(e) => this.setState({ surname: e.target.value })} />
-                            <label>Surname</label>
-                        </span>
+    
+                    <br /><div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            <span className="p-float-label">
+                                <InputText id="email" type="text" value={this.state.email}
+                                    onChange={(e) => this.setState({ email: e.target.value })} />
+                                <label>Email</label>
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <br /><div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        <span className="p-float-label">
-                            <InputText id="email" type="text" value={this.state.email}
-                                onChange={(e) => this.setState({ email: e.target.value })} />
-                            <label>Email</label>
-                        </span>
+    
+                    <br /><div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            <span className="p-float-label">
+                                <InputText id="telephone" type="text" value={this.state.telephone}
+                                    onChange={(e) => this.setState({ telephone: e.target.value })} />
+                                <label>Telephone</label>
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                <br /><div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        <span className="p-float-label">
-                            <InputText id="telephone" type="text" value={this.state.telephone}
-                                onChange={(e) => this.setState({ telephone: e.target.value })} />
-                            <label>Telephone</label>
-                        </span>
-                    </div>
-                </div>
-
-                {
-                    this.userTypes.map((userType) => {
-                        return (
-                            <div className="p-fluid p-formgrid p-grid">
-                                <div className="p-field p-col-12 p-md-5"></div>
-                                <div key={userType.key} className="p-field-radiobutton p-col-12 p-md-2">
-                                    <RadioButton inputId={userType.key} name="userType" value={userType} onChange={(e) => this.setState({ userType: e.value })} checked={this.state.userType.key === userType.key} disabled={userType.key === 'R'} />
-                                    <label htmlFor={userType.key}>{userType.name}</label>
+    
+                    {
+                        this.userTypes.map((userType) => {
+                            return (
+                                <div className="p-fluid p-formgrid p-grid">
+                                    <div className="p-field p-col-12 p-md-5"></div>
+                                    <div key={userType.key} className="p-field-radiobutton p-col-12 p-md-2">
+                                        <RadioButton inputId={userType.key} name="userType" value={userType} onChange={(e) => this.setState({ userType: e.value })} checked={this.state.userType.key === userType.key} disabled={userType.key === 'R'} />
+                                        <label htmlFor={userType.key}>{userType.name}</label>
+                                    </div>
                                 </div>
-                            </div>
-                        )
-                    })
-                }
-
-                <div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        {this.renderUserTypeSpecific()}
+                            )
+                        })
+                    }
+    
+                    <div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            {this.renderUserTypeSpecific()}
+                        </div>
                     </div>
-                </div>
-                
-                <div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-5"></div>
-
-                    <div className="p-field p-col-12 p-md-2">
-                        <Button label="Register" onClick={() => this.register()} />
+                    
+                    <div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 p-md-5"></div>
+    
+                        <div className="p-field p-col-12 p-md-2">
+                            <Button label="Register" onClick={() => this.register()} />
+                        </div>
                     </div>
+    
                 </div>
-
-            </div>
-        );
+            );
+        }
     }
 }
 
