@@ -14,20 +14,38 @@ import { toast } from 'react-toastify';
 
 class RestaurantList extends React.Component {
 
-    state = {
-        loading: true,
-        restaurants: []
-    };
+    constructor(props) {
+        super(props);
+
+        var searchKey = null;
+        if (this.props.match.params.searchKey !== undefined)
+            searchKey = this.props.match.params.searchKey;
+
+        this.state = {
+            loading: true,
+            restaurants: [],
+            searchKey: searchKey
+        };
+
+        console.log(this.state);
+    }
 
     
     fetchData() {
-        axios.get("/customer/allRestaurants").then((result) => {
-            console.log(result);
-            this.setState({restaurants: result.data.data, loading:false});
-        }).catch((error) => {
-            toast.error("Error during the connection.");
-            this.fetchData();
-        });
+        let searchKey = this.state.searchKey;
+        if (searchKey === null) {
+            axios.get("/customer/allRestaurants").then((result) => {
+                console.log(result);
+                this.setState({restaurants: result.data.data, loading:false});
+            }).catch((error) => {
+                toast.error("Error during the connection.");
+                this.fetchData();
+            });
+        }
+        else {
+            console.log("Searching restaurants with key " + searchKey);
+            //TODO
+        }
     }
 
     componentDidMount() {

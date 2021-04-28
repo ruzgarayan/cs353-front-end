@@ -4,9 +4,6 @@ import 'primereact/resources/primereact.css';
 import React from 'react';
 import { Button } from 'primereact/button';
 
-import {
-    Link
-} from "react-router-dom";
 import LoginPage from './login-register/LoginPage';
 import RegisterPage from './login-register/RegisterPage';
 import 'primeflex/primeflex.css';

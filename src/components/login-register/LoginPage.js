@@ -7,6 +7,7 @@ import {InputText} from 'primereact/inputtext';
 import axios from 'axios';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
+import store from './../../reducers/index.js'
 
 import {toast} from 'react-toastify';
 
@@ -24,6 +25,11 @@ class LoginPage extends React.Component {
         console.log(props);
     }
 
+    deneme()
+    {
+
+    }
+
     login()
     {
         let loginPostInfo = {username: this.state.username, password: this.state.password};
@@ -34,14 +40,24 @@ class LoginPage extends React.Component {
                 toast.success(result.data.message);
                 toast.success("Welcome, " + result.data.data.name + " " + result.data.data.surname);
 
-                this.props.loginInfo.userId = result.data.data.userId;
-                this.props.loginInfo.loggedIn = true;
+                const loginAction = () => {
+                    return {
+                        type: "LOGIN",
+                        newState: {
+                            loggedIn: true,
+                            userId: result.data.data.userId,
+                            token: null
+                        }
+                    }
+                }
 
-                if (result.data.data.userType == 'Customer')
-                    this.props.history.push('/customer/main');
-                else if (result.data.data.userType == 'Courier')
+                store.dispatch(loginAction());
+
+                if (result.data.data.userType === 'Customer')
+                    this.props.history.push('/customer/restaurants');
+                else if (result.data.data.userType === 'Courier')
                     this.props.history.push('/courier/main');
-                else if (result.data.data.userType == 'Restaurant Owner')
+                else if (result.data.data.userType === 'Restaurant Owner')
                     this.props.history.push('/restaurant/main');
                 else    
                     toast.error("Incorrect user type.");
@@ -93,9 +109,6 @@ class LoginPage extends React.Component {
         );
     }
 }
-const mapDispatchToProps = {  
-    
-};
 
 const mapStateToProps = state => { 
     return {

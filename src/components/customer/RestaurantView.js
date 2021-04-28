@@ -11,6 +11,7 @@ import 'primeflex/primeflex.css';
 import { toast } from 'react-toastify';
 import { Panel } from 'primereact/panel';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import MenuItemDialog from './MenuItemDialog';
 
 class RestaurantView extends React.Component
 {
@@ -18,10 +19,10 @@ class RestaurantView extends React.Component
         restaurantId: this.props.match.params.id,
         loading: true,
         layout: 'grid',
-        restaurant_info: {
-
-        },
-        category_menus: []
+        restaurant_info: {},
+        category_menus: [],
+        displayDialog: false,
+        chosenMenuItem: null
     }
 
     fetchData() {
@@ -72,6 +73,10 @@ class RestaurantView extends React.Component
         this.fetchData();
     }
 
+    showMenuItemDialog(chosenMenuItem) {
+        this.setState({chosenMenuItem: chosenMenuItem, displayDialog: true});
+    }
+
     renderCategoryMenus() {
         const renderListItem = (data) => {
             return (
@@ -84,7 +89,7 @@ class RestaurantView extends React.Component
                         </div>
                         <div className="product-list-action">
                             <span className="product-price">${data.basePrice}</span>
-                            <Button icon="pi pi-shopping-cart" label="Add to Cart"></Button>
+                            <Button icon="pi pi-shopping-cart" label="Add to Cart" onClick={() => this.showMenuItemDialog(data)}></Button>
                         </div>
                     </div>
                 </div>
@@ -104,37 +109,31 @@ class RestaurantView extends React.Component
                         </div>
                         <div className="product-grid-item-bottom">
                             <span className="product-price">${data.basePrice}</span>
-                            <Button icon="pi pi-shopping-cart" label="Add to Cart" ></Button>
+                            <Button icon="pi pi-shopping-cart" label="Add to Cart" onClick={() => this.showMenuItemDialog(data)}></Button>
                         </div>
                     </div>
                 </div>
             );
         }
     
-        const itemTemplate = (product, layout) => {
-            if (!product) {
+        const itemTemplate = (menuItem, layout) => {
+            if (!menuItem) {
                 return;
             }
     
             if (layout === 'list')
-                return renderListItem(product);
+                return renderListItem(menuItem);
             else if (layout === 'grid')
-                return renderGridItem(product);
-        }
-
-        const categoryHeader = (category) => {
-            return (
-                <p>{category}</p>
-            );
+                return renderGridItem(menuItem);
         }
 
         return (
             <div>
-                {this.state.category_menus.map((menu, index) => (
-                    <div className="dataview-demo">
+                { this.state.category_menus.map((menu, index) => (
+                    <div className="dataview-demo" key={index}>
                     <div className="card">
                         <DataView value={menu.categoryMenuItems} layout={this.state.layout} header={menu.category}
-                                itemTemplate={itemTemplate} paginator rows={5} />
+                                itemTemplate={itemTemplate} />
                     </div>
                 </div>
                 ))}
@@ -183,7 +182,7 @@ class RestaurantView extends React.Component
                     </Panel>
                     <br/> <br/>
                     <Panel header={header}> {this.renderCategoryMenus()} </Panel>
-                    
+                    <MenuItemDialog chosenMenuItem={this.state.chosenMenuItem} visible={this.state.displayDialog} hideDialog={() => this.setState({displayDialog: false})}/>
                 </div>
             );
         }

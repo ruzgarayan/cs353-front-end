@@ -4,7 +4,6 @@ import 'primereact/resources/primereact.css';
 import React from 'react';
 import axios from "axios";
 import {Steps} from 'primereact/steps';
-import { Accordion, AccordionTab } from 'primereact/accordion';
 import { TabView,TabPanel } from 'primereact/tabview';
 import { Button } from 'primereact/button';
 import {connect} from 'react-redux';

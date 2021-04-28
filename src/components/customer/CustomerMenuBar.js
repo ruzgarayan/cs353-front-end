@@ -3,20 +3,22 @@ import 'primereact/resources/primereact.css';
 
 import React from 'react';
 import { Menubar } from 'primereact/menubar';
+import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import {connect} from 'react-redux';
 import { withRouter } from 'react-router'
+import store from './../../reducers/index.js'
 
 
 class CustomerMenuBar extends React.Component
 {
-    render() {
 
+    render() {
         const items = [
             {
                 label: 'Restaurants',
                 icon: 'pi pi-fw pi-sitemap',
-                command: () => { this.props.history.push('/customer/main'); }
+                command: () => { this.props.history.push('/customer/restaurants'); }
             },
             {
                 label: 'Profile',
@@ -31,12 +33,37 @@ class CustomerMenuBar extends React.Component
             {
                 label: 'Logout',
                 icon: 'pi pi-fw pi-power-off',
-                command: () => { this.props.history.push('/'); }
+                command: () => { 
+                    const logoutAction = () => {
+                        return {
+                            type: "LOGOUT",
+                            newState: {
+                                loggedIn: false,
+                                userId: null,
+                                token: null
+                            }
+                        }
+                    }
+                    store.dispatch(logoutAction());
+                    this.props.history.push('/'); 
+                }
             }
         ];
+
+        const totalPrice = store.getState().cartInfo.totalPrice;
+        console.log(totalPrice);
+        let cartLabel = "";
+        if (totalPrice === 0)
+            cartLabel = "Cart (Empty)"
+        else
+            cartLabel = "Cart (" + totalPrice + "$)"
     
         const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="p-mr-2"></img>;
-        const end = <InputText placeholder="Search" type="text" />;
+        const end = <span>
+            <Button icon="pi pi-shopping-cart" label={cartLabel} onClick={() => {this.props.history.push('/customer/finalizeOrder')}}/>
+            <InputText placeholder="Name of restaurant, category, food" type="text" style={{'width': '400px', 'marginLeft': '20px', 'marginRight': '10px'}}/>
+            <Button label="Search" /> 
+            </span>;
     
         return (
             <div>
@@ -48,11 +75,13 @@ class CustomerMenuBar extends React.Component
     }
 }
 
-const mapDispatchToProps = {  
-    
+const mapStateToProps = state => {  
+    return {
+        cartInfo: state.cartInfo
+    };
 };
   
-CustomerMenuBar = withRouter(connect(null,mapDispatchToProps)(CustomerMenuBar))
+CustomerMenuBar = withRouter(connect(mapStateToProps)(CustomerMenuBar))
 
 export default CustomerMenuBar;
 

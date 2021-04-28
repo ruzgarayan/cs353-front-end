@@ -1,11 +1,6 @@
-import 'primeicons/primeicons.css';
-import 'primereact/resources/themes/nova/theme.css';
-import 'primereact/resources/primereact.css';
-import 'primeflex/primeflex.css';
 
 import React from 'react';
 import MainMenu from './components/MainMenu';
-import MainCustomerPage from './components/customer/MainCustomerPage';
 import MainRestaurantPage from './components/restaurant/MainRestaurantPage';
 import MainCourierPage from './components/courier/MainCourierPage';
 import {
@@ -13,12 +8,9 @@ import {
     Route,
 } from "react-router-dom";
 
-import {routerReducer} from 'react-router-redux';
-import {loginInfo} from "./reducers/index"
-
 import { createBrowserHistory } from 'history';
+import store from './reducers/index.js'
 import { Provider } from 'react-redux';
-import { combineReducers, createStore } from 'redux'
 import CustomerMenuBar from './components/customer/CustomerMenuBar';
 import CustomerFavorites from './components/customer/CustomerFavorites';
 import CustomerOldOrders from './components/customer/CustomerOldOrders';
@@ -28,6 +20,12 @@ import OrderDetails from './components/customer/OrderDetails';
 
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
+import 'primeicons/primeicons.css';
+import 'primereact/resources/themes/nova/theme.css';
+import 'primereact/resources/primereact.css';
+import 'primeflex/primeflex.css';
+import RestaurantList from './components/customer/RestaurantList';
+import FinalizeOrderPage from './components/customer/FinalizeOrderPage';
 
 
 class App extends React.Component {
@@ -35,8 +33,6 @@ class App extends React.Component {
     render() {
 
         let history = createBrowserHistory();
-        let reducers = combineReducers({routerReducer, loginInfo});
-        let store = createStore(reducers);
         toast.configure();
 
         return (
@@ -49,10 +45,12 @@ class App extends React.Component {
                                 }
                                     <Route path="/" exact component={MainMenu} /> 
                                     <Route path="/customer" component={CustomerMenuBar} /> 
-                                    <Route path="/customer/main" exact component={MainCustomerPage} />
+                                    <Route path="/customer/restaurants" exact component={RestaurantList} />
+                                    <Route path="/customer/restaurants/search=:searchKey" exact component={RestaurantList} />
                                     <Route path="/customer/profile" exact component={CustomerProfile} />
                                     <Route path="/customer/orders" exact component={CustomerOldOrders} />
                                     <Route path="/customer/favorites" exact component={CustomerFavorites} />
+                                    <Route path="/customer/finalizeOrder" exact component={FinalizeOrderPage} />
                                     <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
                                     <Route path="/customer/orderDetails/:id" exact component={OrderDetails} />
                                     <Route path="/courier" component={MainCourierPage} />

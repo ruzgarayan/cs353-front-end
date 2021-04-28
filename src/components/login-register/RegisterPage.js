@@ -11,10 +11,6 @@ import { ScrollPanel } from 'primereact/scrollpanel';
 import { ListBox } from 'primereact/listbox';
 import { ProgressSpinner } from 'primereact/progressspinner';
 
-import {
-    Link
-} from "react-router-dom";
-
 import { toast } from 'react-toastify';
 
 class RegisterPage extends React.Component {
@@ -127,6 +123,8 @@ class RegisterPage extends React.Component {
                 return (<div> </div>);
             case 'Restaurant Owner':
                 return (<div> </div>);
+            default:
+                return (<div> </div>);
         }
     }
 
@@ -211,7 +209,7 @@ class RegisterPage extends React.Component {
                     {
                         this.userTypes.map((userType) => {
                             return (
-                                <div className="p-fluid p-formgrid p-grid">
+                                <div className="p-fluid p-formgrid p-grid" key={userType.key}>
                                     <div className="p-field p-col-12 p-md-5"></div>
                                     <div key={userType.key} className="p-field-radiobutton p-col-12 p-md-2">
                                         <RadioButton inputId={userType.key} name="userType" value={userType} onChange={(e) => this.setState({ userType: e.value })} checked={this.state.userType.key === userType.key} disabled={userType.key === 'R'} />
