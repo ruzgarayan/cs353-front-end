@@ -37,9 +37,10 @@ class RestaurantList extends React.Component {
 
     
     fetchData() {
-        let searchKey = this.state.searchKey;
+        const searchKey = this.state.searchKey;
+        const userId = this.props.loginInfo.userId;
         if (searchKey === null) {
-            axios.get("/customer/allRestaurants").then((result) => {
+            axios.get("/customer/restaurants/id=" + userId).then((result) => {
                 console.log(result);
                 this.setState({restaurants: result.data.data, loading:false});
             }).catch((error) => {
@@ -48,8 +49,13 @@ class RestaurantList extends React.Component {
             });
         }
         else {
-            console.log("Searching restaurants with key " + searchKey);
-            //TODO
+            axios.get("/customer/restaurants/id=" + userId + "/search=" + searchKey).then((result) => {
+                console.log(result);
+                this.setState({restaurants: result.data.data, loading:false});
+            }).catch((error) => {
+                toast.error("Error during the connection.");
+                this.fetchData();
+            });
         }
     }
 
@@ -120,7 +126,10 @@ class RestaurantList extends React.Component {
     }
 }
 
-const mapDispatchToProps = {    
-}; 
-RestaurantList = withRouter(connect(null,mapDispatchToProps)(RestaurantList))
+const mapStateToProps = state => {
+    return {
+        loginInfo: state.loginInfo
+    };
+};
+RestaurantList = withRouter(connect(mapStateToProps)(RestaurantList))
 export default RestaurantList;

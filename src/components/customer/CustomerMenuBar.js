@@ -12,6 +12,9 @@ import store from './../../reducers/index.js'
 
 class CustomerMenuBar extends React.Component
 {
+    state = {
+        searchKey: ""
+    };
 
     render() {
         const items = [
@@ -51,7 +54,6 @@ class CustomerMenuBar extends React.Component
         ];
 
         const totalPrice = store.getState().cartInfo.totalPrice;
-        console.log(totalPrice);
         let cartLabel = "";
         if (totalPrice === 0)
             cartLabel = "Cart (Empty)"
@@ -61,8 +63,11 @@ class CustomerMenuBar extends React.Component
         const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="p-mr-2"></img>;
         const end = <span>
             <Button icon="pi pi-shopping-cart" label={cartLabel} onClick={() => {this.props.history.push('/customer/finalizeOrder')}}/>
-            <InputText placeholder="Name of restaurant, category, food" type="text" style={{'width': '400px', 'marginLeft': '20px', 'marginRight': '10px'}}/>
-            <Button label="Search" /> 
+            <InputText value={this.state.searchKey} placeholder="Name of restaurant, category, food" type="text" id="searchKey"
+                style={{'width': '400px', 'marginLeft': '20px', 'marginRight': '10px'}}
+                onChange={(e) => {this.setState({searchKey: e.target.value});}} 
+             />
+            <Button label="Search" onClick={() => {this.props.history.push('restaurants/search=' + this.state.searchKey); }}/> 
             </span>;
     
         return (
