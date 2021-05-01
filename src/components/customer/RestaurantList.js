@@ -3,6 +3,7 @@ import 'primereact/resources/primereact.css';
 
 import React from 'react';
 import axios from "axios";
+import { Panel } from 'primereact/panel';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
 import { DataScroller } from 'primereact/datascroller';
@@ -11,6 +12,7 @@ import { withRouter } from 'react-router'
 import { ProgressSpinner } from 'primereact/progressspinner';
 import './styles/customerStyle.css'
 import { toast } from 'react-toastify';
+import {Checkbox} from 'primereact/checkbox';
 
 class RestaurantList extends React.Component {
 
@@ -24,7 +26,10 @@ class RestaurantList extends React.Component {
         this.state = {
             loading: true,
             restaurants: [],
-            searchKey: searchKey
+            searchKey: searchKey,
+            open: true,
+            minRating: null,
+            maxRating: null
         };
 
         console.log(this.state);
@@ -80,10 +85,26 @@ class RestaurantList extends React.Component {
         {
             return (
                 <div className="p-fluid p-formgrid p-grid">
-                    <div className="p-field p-col-12 p-md-3" >
-                        
+                    <div className="p-field p-col-12 p-md-2" >
+                        <Panel style={{'marginTop': '200px'}} header="Search Options">
+                            <div className="p-field-checkbox" style={{'justifyContent': 'center'}}>
+                                <Checkbox onChange={e => this.setState({open: e.checked})} checked={this.state.open} />
+                                <label htmlFor="open" className="p-checkbox-label">Open</label>
+                            </div>
+                            <div className="card">
+                                <label htmlFor="minRating" >Min. Rating</label>
+                                <Rating value={this.state.minRating} onChange={(e) => this.setState({minRating: e.value})} stars={5} />
+                            </div>
+                            <div className="card">
+                                <label htmlFor="maxRating" >Max. Rating</label>
+                                <Rating value={this.state.maxRating} onChange={(e) => this.setState({maxRating: e.value})} stars={5} />
+                            </div>
+                            <div className="card" style={{'marginTop': '25px'}}>
+                                <Button label="Apply Filters" onClick={()=>{/*TODO*/}}/> 
+                            </div>
+                        </Panel>
                     </div>
-                    <div className="p-field p-col-12 p-md-9" >
+                    <div className="p-field p-col-12 p-md-10" >
                         <div className="datascroller-demo">
                             <div className="card">
                                 <DataScroller value={this.state.restaurants} itemTemplate={itemTemplate}
