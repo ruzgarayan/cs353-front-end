@@ -38,6 +38,8 @@ class CustomerProfile extends React.Component {
         selectedRegion: null
     };
 
+    //TODO there is a problem when this.setState({ regions: result.data.data }); doesnt work before trying to change selectedRegion.
+    //Separate into fetchRegions(), fetchUserData(), ... 
     fetchData() {
         let success = true;
         let userId = this.props.loginInfo.userId;
@@ -62,9 +64,12 @@ class CustomerProfile extends React.Component {
                 success = false;
             }
             else {
-                this.setState({ userInfo: result.data.data });
+                const newUserInfo = result.data.data;
+                console.log(newUserInfo);
+                console.log(this.state);
+                this.setState({ userInfo: newUserInfo });
                 for (let i = 0; i < this.state.regions.length; i++) {
-                    if (this.state.regions[i].region_id === this.state.userInfo.region_id) {
+                    if (this.state.regions[i].region_id === newUserInfo.region_id) {
                         this.setState({ selectedRegion: this.state.regions[i] });
                         break;
                     }
@@ -77,7 +82,7 @@ class CustomerProfile extends React.Component {
 
 
         //Get coupons
-        axios.get("/customer/coupons/id=" + userId).then((result) => {
+        axios.get("/raffle/coupons/id=" + userId).then((result) => {
             console.log(result);
             if (!result.data.success) {
                 success = false;
@@ -130,14 +135,12 @@ class CustomerProfile extends React.Component {
     }
 
     render() {
-
         if (this.state.loading) {
             return (
                 <ProgressSpinner />
             );
         }
         else {
-            console.log(this.state);
             return (
 
                 <div className="p-fluid p-formgrid p-grid">
