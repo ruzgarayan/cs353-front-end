@@ -2,6 +2,7 @@ import 'primeicons/primeicons.css';
 import 'primereact/resources/primereact.css';
 
 import React from 'react';
+import axios from "axios";
 import { DataView } from 'primereact/dataview';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
@@ -10,7 +11,7 @@ import { Calendar } from 'primereact/calendar';
 import { InputText } from 'primereact/inputtext';
 import { Card } from 'primereact/card';
 import { toast } from "react-toastify";
-import store from './../../reducers/index.js'
+import store, { loginInfo } from './../../reducers/index.js'
 import './styles/restaurantViewStyle.css';
 import 'primeflex/primeflex.css';
 import { connect } from 'react-redux';
@@ -26,6 +27,7 @@ class FinalizeOrderPage extends React.Component {
         paymentMethod: null,
         deliverNow: true,
         optionalDeliveryTime: null,
+        couponInput: null
     };
 
     showMenuItemDialog(chosenMenuItem) {
@@ -60,10 +62,27 @@ class FinalizeOrderPage extends React.Component {
             return renderItem(menuItem);
         }
 
+        const renderHeader = () => {
+            return (
+                <span>Cart<Button style={{ 'float': 'right' }} label="" className="p-button-danger" icon='pi pi-fw pi-trash'
+                    onClick={() => {
+                        const emptyCartAction = () => {
+                            return {
+                                type: "EMPTY"
+                            }
+                        }
+
+                        store.dispatch(emptyCartAction());
+                    }} /></span>
+
+            );
+        }
+        const header = renderHeader();
+
         return (
             <div className="dataview-demo" >
                 <div className="card">
-                    <DataView value={cartItems} layout={'list'} header="Cart" itemTemplate={itemTemplate} />
+                    <DataView emptyMessage="Your cart is empty." value={cartItems} layout={'list'} header={header} itemTemplate={itemTemplate} />
                 </div>
             </div>
         );
@@ -80,16 +99,94 @@ class FinalizeOrderPage extends React.Component {
         );
     }
 
+    makeOrder() {
+        const cartInfo = this.props.cartInfo;
+        const loginInfo = this.props.loginInfo;
+        const cartItems = cartInfo.cartItems;
+
+        if (cartItems.length == 0) {
+            toast.error("Your cart is empty.");
+            return;
+        }
+
+        const restaurantId = cartInfo.cartItems[0].menuItemData.restaurantId;
+        const customerId = loginInfo.userId;
+        const price = cartInfo.totalPrice;
+        const optionalDeliveryTime = this.state.deliverNow ? null : this.state.optionalDeliveryTime;
+        const paymentMethod = this.state.paymentMethod.name;
+
+        let selectedMenuItems = [];
+        console.log(cartItems);
+
+        for (var i = 0; i < cartItems.length; i++) {
+            const cartItemData = cartItems[i];
+            let cartItem = {
+                menuItemId: cartItemData.menuItemId,
+                quantity: cartItemData.quantity,
+                selectedIngredients: cartItemData.selectedIngredients
+            }
+
+            selectedMenuItems = [...selectedMenuItems, cartItem];
+        }
+
+        let orderData = {
+            restaurantId: restaurantId,
+            customerId: customerId,
+            price: price,
+            optionalDeliveryTime: optionalDeliveryTime,
+            paymentMethod: paymentMethod,
+
+            selectedMenuItems: selectedMenuItems
+        };
+        console.log(orderData);
+
+        axios.post("/customer/order", orderData).then((result) => {
+            console.log(result);
+        }).catch((error) => {
+
+        });
+    }
+
+    applyCoupon() {
+        //TODO
+        const couponData = {couponId: "DENEME", discountAmount: 25, restaurantName: "DENEME RESTORANI", restaurantId: 10};
+        const applyCountAction = () => {
+            return {
+            type: "APPLY_COUPON",
+            couponData: couponData
+        };
+        }
+        store.dispatch(applyCountAction());
+    }
+
     render() {
         const itemList = this.renderItemList();
         const totalPrice = this.props.cartInfo.totalPrice;
+        const minDate = new Date();
+        const couponInfo = this.props.cartInfo.usedCoupon;
 
-        const cities = [
+        const paymentMethods = [
             { name: 'Online Payment', code: '1' },
             { name: 'Credit Card at Door', code: '2' },
             { name: 'Cash at Door', code: '3' },
             { name: 'Sodexo', code: '4' }
         ];
+
+        const renderCoupon = () => {
+            if (couponInfo === null) {
+                return (
+                <div>You haven't added a coupon.</div>
+                );
+            }
+            else {
+                return (
+                <Card title={couponInfo.couponId} style={{ 'borderStyle': 'dashed' }}>
+                    <div >{couponInfo.discountAmount}$ discount in {couponInfo.restaurantName}</div>
+                </Card>
+                );
+            }
+        }
+        const coupon = renderCoupon();
 
         return (
             <div>
@@ -100,7 +197,7 @@ class FinalizeOrderPage extends React.Component {
                             <div className="p-field p-grid">
                                 <label htmlFor="paymentmethod" className="p-col-fixed" style={{ width: '100px' }}>Payment Method</label>
                                 <div className="p-col">
-                                    <Dropdown optionLabel="name" value={this.state.paymentMethod} options={cities} onChange={(e) => this.setState({ paymentMethod: e.value })} placeholder="Select a Payment Method" />
+                                    <Dropdown optionLabel="name" value={this.state.paymentMethod} options={paymentMethods} onChange={(e) => this.setState({ paymentMethod: e.value })} placeholder="Select a Payment Method" />
                                 </div>
                             </div>
 
@@ -114,7 +211,8 @@ class FinalizeOrderPage extends React.Component {
                             <div className="p-field p-grid">
                                 <label htmlFor="optionalDeliveryTime" className="p-col-fixed" style={{ width: '100px' }}>Optional Delivery Time</label>
                                 <div className="p-col">
-                                    <Calendar disabled={this.state.deliverNow} id="time24" value={this.state.optionalDeliveryTime} onChange={(e) => this.setState({ optionalDeliveryTime: e.value })} showTime />
+                                    <Calendar disabled={this.state.deliverNow} id="time24" minDate={minDate}
+                                        value={this.state.optionalDeliveryTime} onChange={(e) => this.setState({ optionalDeliveryTime: e.value })} showTime />
                                 </div>
                             </div>
                         </div>
@@ -123,19 +221,21 @@ class FinalizeOrderPage extends React.Component {
                             <div className="p-field p-grid">
                                 <label htmlFor="coupon" className="p-col-fixed" style={{ width: '100px' }}>Enter coupon</label>
                                 <div className="p-col">
-                                    <InputText id="coupon" type="text" />
+                                    <InputText id="coupon" type="text" value={this.state.couponInput}
+                                onChange={(e) => this.setState({ couponInput: e.target.value })} />
                                 </div>
                             </div>
                             <div className="p-field p-grid">
-                                <Button label="Apply coupon"/>
+                                <Button label="Apply coupon" onClick={() => { this.applyCoupon() }} />
                             </div>
+                            {coupon}
                         </div>
 
                         <div className="p-field p-col-12 p-md-1" ></div>
                         <div className="p-field p-col-12 p-md-3" >
                             <h1>Total is {totalPrice}$ </h1>
                             <div className="p-field p-grid">
-                                <Button label="Confirm the Order"/>
+                                <Button label="Confirm the Order" onClick={() => { this.makeOrder() }} />
                             </div>
                         </div>
                     </div>
@@ -148,7 +248,8 @@ class FinalizeOrderPage extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        cartInfo: state.cartInfo
+        cartInfo: state.cartInfo,
+        loginInfo: state.loginInfo
     };
 };
 
