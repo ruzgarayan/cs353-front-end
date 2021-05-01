@@ -67,7 +67,7 @@ class CustomerMenuBar extends React.Component
                 style={{'width': '400px', 'marginLeft': '20px', 'marginRight': '10px'}}
                 onChange={(e) => {this.setState({searchKey: e.target.value});}} 
              />
-            <Button label="Search" onClick={() => {this.props.history.push('restaurants/search=' + this.state.searchKey); }}/> 
+            <Button label="Search" onClick={() => {this.props.history.replace('/customer/restaurants/search=' + this.state.searchKey); }}/> 
             </span>;
     
         return (

@@ -7,56 +7,98 @@ import { Panel } from 'primereact/panel';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
 import { DataScroller } from 'primereact/datascroller';
-import {connect} from 'react-redux';
+import { InputNumber } from 'primereact/inputnumber';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router'
 import { ProgressSpinner } from 'primereact/progressspinner';
 import './styles/customerStyle.css'
 import { toast } from 'react-toastify';
-import {Checkbox} from 'primereact/checkbox';
+import { Checkbox } from 'primereact/checkbox';
 
 class RestaurantList extends React.Component {
 
     constructor(props) {
         super(props);
 
-        var searchKey = null;
+        let searchKey = null;
         if (this.props.match.params.searchKey !== undefined)
             searchKey = this.props.match.params.searchKey;
+
+        let minRating = null;
+        if (this.props.match.params.min !== undefined)
+            minRating = parseFloat(this.props.match.params.min);
+        else
+            minRating = 0;
+
+        let maxRating = null;
+        if (this.props.match.params.max !== undefined)
+            maxRating = parseFloat(this.props.match.params.max);        
+        else
+            maxRating = 5;
+
+        let open = null;
+        if (this.props.match.params.open !== undefined)
+            open = this.props.match.params.open === "true";
+        else   
+            open = true;
 
         this.state = {
             loading: true,
             restaurants: [],
-            searchKey: searchKey,
-            open: true,
-            minRating: null,
-            maxRating: null
+            open: open,
+            minRating: minRating,
+            maxRating: maxRating,
+            searchKey: searchKey
         };
 
         console.log(this.state);
     }
 
-    
+    componentDidUpdate(prevProps)
+    {
+        if (prevProps !== this.props)
+            this.fetchData();
+    }
+
+
     fetchData() {
-        const searchKey = this.state.searchKey;
         const userId = this.props.loginInfo.userId;
-        if (searchKey === null) {
-            axios.get("/customer/restaurants/id=" + userId).then((result) => {
-                console.log(result);
-                this.setState({restaurants: result.data.data, loading:false});
-            }).catch((error) => {
-                toast.error("Error during the connection.");
-                this.fetchData();
-            });
-        }
-        else {
+
+        let searchKey = this.state.searchKey;
+
+        if (searchKey !== null) {
             axios.get("/customer/restaurants/id=" + userId + "/search=" + searchKey).then((result) => {
                 console.log(result);
-                this.setState({restaurants: result.data.data, loading:false});
+                this.setState({ restaurants: result.data.data, loading: false });
+            }).catch((error) => {
+                toast.error("Error during the connection.");
+                this.fetchData();
+            })
+            return;
+        }
+
+        let minRating = this.state.minRating;
+        let maxRating = this.state.maxRating;
+        let open = this.state.open;
+
+        if (minRating !== null && maxRating !== null && open !== null) {
+            axios.get("/customer/restaurants/id=" + userId + "/open=" + open + "/rating=" + minRating + "to" + maxRating).then((result) => {
+                console.log(result);
+                this.setState({ restaurants: result.data.data, loading: false });
             }).catch((error) => {
                 toast.error("Error during the connection.");
                 this.fetchData();
             });
+            return;
         }
+
+        axios.get("/customer/restaurants/id=" + userId).then((result) => {
+            console.log(result);
+            this.setState({ restaurants: result.data.data, loading: false });
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+            this.fetchData();
+        });
     }
 
     componentDidMount() {
@@ -75,38 +117,42 @@ class RestaurantList extends React.Component {
                         <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.restaurant_category}</span>
                     </div>
                     <div className="restaurant-action">
-                        <Button icon="pi pi-shopping-cart" label="Enter" onClick= {() => { this.props.history.push('/customer/restaurantPage/' + data.restaurantId);}}></Button>
+                        <Button icon="pi pi-shopping-cart" label="Enter" onClick={() => { this.props.history.push('/customer/restaurantPage/' + data.restaurantId); }}></Button>
                     </div>
                 </div>
             );
         }
-        
-        if (this.state.loading)
-        {
+
+        if (this.state.loading) {
             return (
-                <ProgressSpinner/>
+                <ProgressSpinner />
             );
         }
-        else
-        {
+        else {
             return (
                 <div className="p-fluid p-formgrid p-grid">
                     <div className="p-field p-col-12 p-md-2" >
-                        <Panel style={{'marginTop': '200px'}} header="Search Options">
-                            <div className="p-field-checkbox" style={{'justifyContent': 'center'}}>
-                                <Checkbox onChange={e => this.setState({open: e.checked})} checked={this.state.open} />
+                        <Panel style={{ 'marginTop': '200px' }} header="Search Options">
+                            <div className="p-field-checkbox" style={{ 'justifyContent': 'center' }}>
+                                <Checkbox onChange={e => this.setState({ open: e.checked })} checked={this.state.open} />
                                 <label htmlFor="open" className="p-checkbox-label">Open</label>
                             </div>
                             <div className="card">
                                 <label htmlFor="minRating" >Min. Rating</label>
-                                <Rating value={this.state.minRating} onChange={(e) => this.setState({minRating: e.value})} stars={5} />
+                                <InputNumber id="horizontal" value={this.state.minRating} onValueChange={(e) => this.setState({ minRating: e.value })} 
+                                showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
+                                 incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={0} max={this.state.maxRating}/>
                             </div>
                             <div className="card">
                                 <label htmlFor="maxRating" >Max. Rating</label>
-                                <Rating value={this.state.maxRating} onChange={(e) => this.setState({maxRating: e.value})} stars={5} />
+                                <InputNumber id="horizontal" value={this.state.maxRating} onValueChange={(e) => this.setState({ maxRating: e.value })}
+                                 showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
+                                  incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={this.state.minRating} max={5}/>
                             </div>
-                            <div className="card" style={{'marginTop': '25px'}}>
-                                <Button label="Apply Filters" onClick={()=>{/*TODO*/}}/> 
+                            <div className="card" style={{ 'marginTop': '25px' }}>
+                                <Button label="Apply Filters" 
+                                onClick={() => {this.props.history.replace('/customer/restaurants/min=' + this.state.minRating +
+                                 "/max=" + this.state.maxRating + "/open=" + this.state.open);}} />
                             </div>
                         </Panel>
                     </div>
@@ -114,12 +160,12 @@ class RestaurantList extends React.Component {
                         <div className="datascroller-demo">
                             <div className="card">
                                 <DataScroller value={this.state.restaurants} itemTemplate={itemTemplate}
-                                    rows={6} buffer={0.4} header="List of Restaurants" />
+                                    rows={10} buffer={0.4} header="List of Restaurants" />
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
             );
         }
 

@@ -13,7 +13,7 @@ import store from './reducers/index.js'
 import { Provider } from 'react-redux';
 import CustomerMenuBar from './components/customer/CustomerMenuBar';
 import CustomerFavorites from './components/customer/CustomerFavorites';
-import CustomerOldOrders from './components/customer/CustomerOldOrders';
+import CustomerOrderList from './components/customer/CustomerOrderList';
 import CustomerProfile from './components/customer/CustomerProfile';
 import RestaurantView from './components/customer/RestaurantView';
 import OrderDetails from './components/customer/OrderDetails';
@@ -47,8 +47,9 @@ class App extends React.Component {
                                     <Route path="/customer" component={CustomerMenuBar} /> 
                                     <Route path="/customer/restaurants" exact component={RestaurantList} />
                                     <Route path="/customer/restaurants/search=:searchKey" exact component={RestaurantList} />
+                                    <Route path="/customer/restaurants/min=:min/max=:max/open=:open" exact component={RestaurantList} />
                                     <Route path="/customer/profile" exact component={CustomerProfile} />
-                                    <Route path="/customer/orders" exact component={CustomerOldOrders} />
+                                    <Route path="/customer/orders" exact component={CustomerOrderList} />
                                     <Route path="/customer/favorites" exact component={CustomerFavorites} />
                                     <Route path="/customer/finalizeOrder" exact component={FinalizeOrderPage} />
                                     <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
