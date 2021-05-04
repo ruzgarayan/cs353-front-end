@@ -32,14 +32,14 @@ class RestaurantList extends React.Component {
 
         let maxRating = null;
         if (this.props.match.params.max !== undefined)
-            maxRating = parseFloat(this.props.match.params.max);        
+            maxRating = parseFloat(this.props.match.params.max);
         else
             maxRating = 5;
 
         let open = null;
         if (this.props.match.params.open !== undefined)
             open = this.props.match.params.open === "true";
-        else   
+        else
             open = true;
 
         this.state = {
@@ -48,26 +48,30 @@ class RestaurantList extends React.Component {
             open: open,
             minRating: minRating,
             maxRating: maxRating,
-            searchKey: searchKey
+            searchKey: searchKey,
+            favorites: []
         };
-
-        console.log(this.state);
     }
 
-    componentDidUpdate(prevProps)
-    {
-        if (prevProps !== this.props)
-            this.fetchData();
-    }
-
-
-    fetchData() {
+    async fetchData() {
         const userId = this.props.loginInfo.userId;
-
         let searchKey = this.state.searchKey;
 
+        await axios.get("/customer/getFavorite/customer_id=" + userId).then((result) => {
+            if (result.data.success) {
+                let favorites = [];
+                for (var i = 0; i < result.data.data.length; i++)
+                    favorites = [...favorites, result.data.data[i].restaurantId];
+                this.setState({ favorites: favorites });
+            }
+            else
+                toast.error(result.data.message);
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+        })
+
         if (searchKey !== null) {
-            axios.get("/customer/restaurants/id=" + userId + "/search=" + searchKey).then((result) => {
+            await axios.get("/customer/restaurants/id=" + userId + "/search=" + searchKey).then((result) => {
                 console.log(result);
                 this.setState({ restaurants: result.data.data, loading: false });
             }).catch((error) => {
@@ -82,8 +86,7 @@ class RestaurantList extends React.Component {
         let open = this.state.open;
 
         if (minRating !== null && maxRating !== null && open !== null) {
-            axios.get("/customer/restaurants/id=" + userId + "/open=" + open + "/rating=" + minRating + "to" + maxRating).then((result) => {
-                console.log(result);
+            await axios.get("/customer/restaurants/id=" + userId + "/open=" + open + "/rating=" + minRating + "to" + maxRating).then((result) => {
                 this.setState({ restaurants: result.data.data, loading: false });
             }).catch((error) => {
                 toast.error("Error during the connection.");
@@ -92,7 +95,7 @@ class RestaurantList extends React.Component {
             return;
         }
 
-        axios.get("/customer/restaurants/id=" + userId).then((result) => {
+        await axios.get("/customer/restaurants/id=" + userId).then((result) => {
             console.log(result);
             this.setState({ restaurants: result.data.data, loading: false });
         }).catch((error) => {
@@ -105,8 +108,72 @@ class RestaurantList extends React.Component {
         this.fetchData();
     }
 
+    addFavorite(restaurantId) {
+        const userId = this.props.loginInfo.userId;
+        const oldFavorites = this.state.favorites;
+        const newFavorites = [...oldFavorites, restaurantId];
+        axios.post("/customer/addFavorite/customer_id=" + userId + "/restaurant_id=" + restaurantId).then((result) => {
+            if (result.data.success)
+            {
+                this.setState({ favorites: newFavorites });
+                toast.success("Restaurant is successfully added to your favorites.");
+            }
+            else {
+                toast.success(result.data.message);
+            }
+
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+        });
+    }
+
+    removeFavorite(restaurantId) {
+        const userId = this.props.loginInfo.userId;
+        const oldFavorites = this.state.favorites;
+        let newFavorites = [];
+        for (var i = 0; i < oldFavorites.length; i++) {
+            if (oldFavorites[i] !== restaurantId)
+                newFavorites = [...newFavorites, oldFavorites[i]];
+        }
+
+        axios.post("/customer/removeFavorite/customer_id=" + userId + "/restaurant_id=" + restaurantId).then((result) => {
+            if (result.data.success)
+            {
+                this.setState({ favorites: newFavorites });
+                toast.success("Restaurant is successfully removed from your favorites.");
+            }
+            else {
+                toast.success(result.data.message);
+            }
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+        });
+    }
+
     render() {
+        console.log(this.state);
+        const favorites = this.state.favorites;
         const itemTemplate = (data) => {
+
+            const renderFavoriteButtons = () => {
+                for (var i = 0; i < favorites.length; i++) {
+                    if (data.restaurantId === favorites[i]) {
+                        return (
+                            <div>
+                                <i className="pi pi-star" style={{ 'fontSize': '2em' }}> </i>    <div>
+                                    <Button icon="pi pi-times" className="p-button-danger p-button-text" label="Remove Favorite"
+                                        onClick={() => { this.removeFavorite(data.restaurantId) }} style={{ 'width': '200px', 'marginTop': '50px' }} /></div></div>
+                        );
+                    }
+                }
+
+                return (
+                    <div>
+                        <i className="pi pi-star-o" style={{ 'fontSize': '2em' }}> </i>        <div>
+                            <Button icon="pi pi-bookmark" className="p-button-success p-button-text" label="Add Favorite"
+                                onClick={() => { this.addFavorite(data.restaurantId) }} style={{ 'width': '200px', 'marginTop': '50px' }} /> </div> </div>
+                );
+            }
             return (
                 <div className="restaurant-item">
                     <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" />
@@ -117,6 +184,7 @@ class RestaurantList extends React.Component {
                         <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.restaurant_category}</span>
                     </div>
                     <div className="restaurant-action">
+                        {renderFavoriteButtons()}
                         <Button icon="pi pi-shopping-cart" label="Enter" onClick={() => { this.props.history.push('/customer/restaurantPage/' + data.restaurantId); }}></Button>
                     </div>
                 </div>
@@ -139,20 +207,22 @@ class RestaurantList extends React.Component {
                             </div>
                             <div className="card">
                                 <label htmlFor="minRating" >Min. Rating</label>
-                                <InputNumber id="horizontal" value={this.state.minRating} onValueChange={(e) => this.setState({ minRating: e.value })} 
-                                showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
-                                 incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={0} max={this.state.maxRating}/>
+                                <InputNumber id="horizontal" value={this.state.minRating} onValueChange={(e) => this.setState({ minRating: e.value })}
+                                    showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
+                                    incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={0} max={this.state.maxRating} />
                             </div>
                             <div className="card">
                                 <label htmlFor="maxRating" >Max. Rating</label>
                                 <InputNumber id="horizontal" value={this.state.maxRating} onValueChange={(e) => this.setState({ maxRating: e.value })}
-                                 showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
-                                  incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={this.state.minRating} max={5}/>
+                                    showButtons buttonLayout="horizontal" step={0.1} decrementButtonClassName="p-button-danger" incrementButtonClassName="p-button-success"
+                                    incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" mode="decimal" min={this.state.minRating} max={5} />
                             </div>
                             <div className="card" style={{ 'marginTop': '25px' }}>
-                                <Button label="Apply Filters" 
-                                onClick={() => {this.props.history.replace('/customer/restaurants/min=' + this.state.minRating +
-                                 "/max=" + this.state.maxRating + "/open=" + this.state.open);}} />
+                                <Button label="Apply Filters"
+                                    onClick={() => {
+                                        this.props.history.replace('/customer/restaurants/min=' + this.state.minRating +
+                                            "/max=" + this.state.maxRating + "/open=" + this.state.open); window.location.reload();
+                                    }} />
                             </div>
                         </Panel>
                     </div>

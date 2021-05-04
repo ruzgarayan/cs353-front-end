@@ -27,7 +27,7 @@ class FinalizeOrderPage extends React.Component {
         paymentMethod: null,
         deliverNow: true,
         optionalDeliveryTime: null,
-        couponInput: null
+        couponInput: ""
     };
 
     showMenuItemDialog(chosenMenuItem) {
@@ -147,16 +147,33 @@ class FinalizeOrderPage extends React.Component {
         });
     }
 
-    applyCoupon() {
-        //TODO
-        const couponData = {couponId: "DENEME", discountAmount: 25, restaurantName: "DENEME RESTORANI", restaurantId: 10};
-        const applyCountAction = () => {
-            return {
-            type: "APPLY_COUPON",
-            couponData: couponData
-        };
+    applyCoupon(couponId) {        
+        const cartInfo = this.props.cartInfo;
+        const cartItems = cartInfo.cartItems;
+        if (cartItems.length == 0) {
+            toast.error("Your cart is empty.");
+            return;
         }
-        store.dispatch(applyCountAction());
+        const restaurantId = cartInfo.cartItems[0].menuItemData.restaurantId;
+        console.log(couponId);
+
+        axios.post("/raffle/checkCoupon/restaurant_id=" + restaurantId, couponId, {headers: {"Content-Type": "text/plain"}}).then((result) => {
+            if (result.data.success)
+            {
+                const couponData = result.data.data;
+                console.log(couponData);
+                const applyCouponAction = () => {
+                    return {
+                    type: "APPLY_COUPON",
+                    couponData: couponData
+                };
+                }
+                store.dispatch(applyCouponAction());
+            }
+            else{
+                toast.error(result.data.message);
+            }
+        }).catch((error) => {});
     }
 
     render() {
@@ -226,7 +243,7 @@ class FinalizeOrderPage extends React.Component {
                                 </div>
                             </div>
                             <div className="p-field p-grid">
-                                <Button label="Apply coupon" onClick={() => { this.applyCoupon() }} />
+                                <Button label="Apply coupon" onClick={() => { this.applyCoupon(this.state.couponInput) }} />
                             </div>
                             {coupon}
                         </div>

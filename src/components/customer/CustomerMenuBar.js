@@ -5,13 +5,12 @@ import React from 'react';
 import { Menubar } from 'primereact/menubar';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router'
 import store from './../../reducers/index.js'
 
 
-class CustomerMenuBar extends React.Component
-{
+class CustomerMenuBar extends React.Component {
     state = {
         searchKey: ""
     };
@@ -36,7 +35,7 @@ class CustomerMenuBar extends React.Component
             {
                 label: 'Logout',
                 icon: 'pi pi-fw pi-power-off',
-                command: () => { 
+                command: () => {
                     const logoutAction = () => {
                         return {
                             type: "LOGOUT",
@@ -48,7 +47,7 @@ class CustomerMenuBar extends React.Component
                         }
                     }
                     store.dispatch(logoutAction());
-                    this.props.history.push('/'); 
+                    this.props.history.push('/');
                 }
             }
         ];
@@ -59,17 +58,20 @@ class CustomerMenuBar extends React.Component
             cartLabel = "Cart (Empty)"
         else
             cartLabel = "Cart (" + totalPrice + "$)"
-    
-        const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="p-mr-2"></img>;
+
+        const start = <img alt="logo" src="showcase/images/logo.png" onError={(e) => e.target.src = 'https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} height="40" className="p-mr-2"></img>;
         const end = <span>
-            <Button icon="pi pi-shopping-cart" label={cartLabel} onClick={() => {this.props.history.push('/customer/finalizeOrder')}}/>
+            <Button icon="pi pi-shopping-cart" label={cartLabel} onClick={() => { this.props.history.push('/customer/finalizeOrder') }} />
             <InputText value={this.state.searchKey} placeholder="Name of restaurant, category, food" type="text" id="searchKey"
-                style={{'width': '400px', 'marginLeft': '20px', 'marginRight': '10px'}}
-                onChange={(e) => {this.setState({searchKey: e.target.value});}} 
-             />
-            <Button label="Search" onClick={() => {this.props.history.replace('/customer/restaurants/search=' + this.state.searchKey); }}/> 
-            </span>;
-    
+                style={{ 'width': '400px', 'marginLeft': '20px', 'marginRight': '10px' }}
+                onChange={(e) => { this.setState({ searchKey: e.target.value }); }}
+            />
+            <Button label="Search" onClick={() => {
+                this.props.history.replace('/customer/restaurants/search=' + this.state.searchKey);
+                window.location.reload();
+            }} />
+        </span>;
+
         return (
             <div>
                 <div className="card">
@@ -80,18 +82,18 @@ class CustomerMenuBar extends React.Component
     }
 }
 
-const mapStateToProps = state => {  
+const mapStateToProps = state => {
     return {
         cartInfo: state.cartInfo
     };
 };
-  
+
 CustomerMenuBar = withRouter(connect(mapStateToProps)(CustomerMenuBar))
 
 export default CustomerMenuBar;
 
 /*
-const mapStateToProps = state => {  
+const mapStateToProps = state => {
     return {
         history: state.history
     };

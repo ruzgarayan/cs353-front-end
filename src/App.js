@@ -16,7 +16,6 @@ import CustomerFavorites from './components/customer/CustomerFavorites';
 import CustomerOrderList from './components/customer/CustomerOrderList';
 import CustomerProfile from './components/customer/CustomerProfile';
 import RestaurantView from './components/customer/RestaurantView';
-import OrderDetails from './components/customer/OrderDetails';
 
 import {ToastContainer, toast} from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css';
@@ -53,7 +52,6 @@ class App extends React.Component {
                                     <Route path="/customer/favorites" exact component={CustomerFavorites} />
                                     <Route path="/customer/finalizeOrder" exact component={FinalizeOrderPage} />
                                     <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
-                                    <Route path="/customer/orderDetails/:id" exact component={OrderDetails} />
                                     <Route path="/courier" component={MainCourierPage} />
                                     <Route path="/restaurant" component={MainRestaurantPage} />
                                 

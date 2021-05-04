@@ -300,7 +300,5 @@ const mapStateToProps = state => {
         cartInfo: state.cartInfo
     };
 };
-
-MenuItemDialog = withRouter(connect(mapStateToProps)(MenuItemDialog))
-
+MenuItemDialog = withRouter(connect(mapStateToProps)(MenuItemDialog));
 export default MenuItemDialog;

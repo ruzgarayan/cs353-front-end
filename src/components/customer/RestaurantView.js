@@ -12,9 +12,12 @@ import { toast } from 'react-toastify';
 import { Panel } from 'primereact/panel';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import MenuItemDialog from './MenuItemDialog';
+import { TabView, TabPanel } from 'primereact/tabview';
+import moment from 'moment';
+import { Divider } from 'primereact/divider';
+import { Fieldset } from 'primereact/fieldset';
 
-class RestaurantView extends React.Component
-{
+class RestaurantView extends React.Component {
     state = {
         restaurantId: this.props.match.params.id,
         loading: true,
@@ -22,51 +25,51 @@ class RestaurantView extends React.Component
         restaurant_info: {},
         category_menus: [],
         displayDialog: false,
-        chosenMenuItem: null
+        chosenMenuItem: null,
+        reviews: []
     }
 
-    fetchData() {
+    async fetchData() {
         let success = true;
         let restaurantId = this.state.restaurantId;
-        this.setState({loading: true});
+        this.setState({ loading: true });
 
         //Get restaurant info
-        axios.get("/customer/restaurantInfo/id=" + restaurantId).then((result) => {
+        await axios.get("/customer/restaurantInfo/id=" + restaurantId).then((result) => {
             console.log(result);
-            if (!result.data.success)
-            {
-                success = false;
+            if (!result.data.success) {
+                toast.error("Error while getting the restaurant info.");
             }
             else
-                this.setState({restaurant_info: result.data.data});
+                this.setState({ restaurant_info: result.data.data });
         }).catch((error) => {
             toast.error("Error while getting the restaurant info.");
-            success = false;
         });
 
         //Get restaurant menu
-        axios.get("/customer/restaurantMenuByCategory/id=" + restaurantId).then((result) => {
+        await axios.get("/customer/restaurantMenuByCategory/id=" + restaurantId).then((result) => {
             console.log(result);
-            if (!result.data.success)
-            {
-                success = false;
+            if (!result.data.success) {
+                toast.error("Error while getting the restaurant menu.");
             }
             else
-                this.setState({category_menus: result.data.data});
+                this.setState({ category_menus: result.data.data });
         }).catch((error) => {
             toast.error("Error while getting the restaurant menu.");
-            success = false;
         });
 
-
-        //If success, stop loading screen
-        if (success)
-            this.setState({loading: false});
-        else
-        {
-            toast.error("An error occured, retrying...");
-            this.fetchData();
-        }
+        //Get reviews
+        await axios.get("/review/getReviews/restaurant_id=" + restaurantId).then((result) => {
+            console.log(result);
+            if (!result.data.success) {
+                toast.error("Error while getting the reviews.");
+            }
+            else
+                this.setState({ reviews: result.data.data });
+        }).catch((error) => {
+            toast.error("Error while getting the reviews.");
+        });
+        this.setState({ loading: false });
     }
 
     componentDidMount() {
@@ -74,7 +77,7 @@ class RestaurantView extends React.Component
     }
 
     showMenuItemDialog(chosenMenuItem) {
-        this.setState({chosenMenuItem: chosenMenuItem, displayDialog: true});
+        this.setState({ chosenMenuItem: chosenMenuItem, displayDialog: true });
     }
 
     renderCategoryMenus() {
@@ -82,7 +85,7 @@ class RestaurantView extends React.Component
             return (
                 <div className="p-col-12">
                     <div className="product-list-item">
-                        <img src={data.imageLink} onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.name} />
+                        <img src={data.imageLink} onError={(e) => e.target.src = 'https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.name} />
                         <div className="product-list-detail">
                             <div className="product-name">{data.name}</div>
                             <div className="product-description">{data.description}</div>
@@ -95,7 +98,7 @@ class RestaurantView extends React.Component
                 </div>
             );
         }
-    
+
         const renderGridItem = (data) => {
             return (
                 <div className="p-col-12 p-md-4">
@@ -103,7 +106,7 @@ class RestaurantView extends React.Component
                         <div className="product-grid-item-top">
                         </div>
                         <div className="product-grid-item-content">
-                        <img src={data.imageLink} onError={(e) => e.target.src='https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.name} />
+                            <img src={data.imageLink} onError={(e) => e.target.src = 'https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.name} />
                             <div className="product-name">{data.name}</div>
                             <div className="product-description">{data.description}</div>
                         </div>
@@ -115,12 +118,12 @@ class RestaurantView extends React.Component
                 </div>
             );
         }
-    
+
         const itemTemplate = (menuItem, layout) => {
             if (!menuItem) {
                 return;
             }
-    
+
             if (layout === 'list')
                 return renderListItem(menuItem);
             else if (layout === 'grid')
@@ -131,58 +134,115 @@ class RestaurantView extends React.Component
             <div>
                 { this.state.category_menus.map((menu, index) => (
                     <div className="dataview-demo" key={index}>
-                    <div className="card">
-                        <DataView value={menu.categoryMenuItems} layout={this.state.layout} header={menu.category}
+                        <div className="card">
+                            <DataView value={menu.categoryMenuItems} layout={this.state.layout} header={menu.category}
                                 itemTemplate={itemTemplate} />
+                        </div>
                     </div>
-                </div>
                 ))}
             </div>
         );
     }
 
-    render() {
-        if (this.state.loading)
-        {
+    renderReviewPanel() {
+
+        if (this.state.reviews === null || this.state.reviews.length === 0) {
             return (
-                <ProgressSpinner/>
+                <div> There are no reviews available for this restaurant.</div>
             );
         }
-        else {  
-            
+
+        const itemTemplate = (data) => {
+            const orderTime = new Date(data.date).toUTCString();
+            const timeFromNow = moment(orderTime).fromNow();
+
+            const renderResponsePart = () => {
+                if (data.response === null || data.response === "")
+                    return <div></div>;
+                else
+                    return (
+                        <div>
+                            <Divider align="center" >
+                                <b>Response from Restaurant Owner:</b>
+                            </Divider>
+                            <div className="p-col-12">
+                                {data.response}
+                            </div>
+                        </div>
+                    );
+            }
+            const responsePart = renderResponsePart();
+
+            const legend = () => {
+                return <div><Rating value={data.restaurantScore} readOnly cancel={false} style={{ 'marginBottom': '20px' }} ></Rating> {timeFromNow}</div>;
+            }
+
+            return (
+                <div className="p-col-12">
+                    <Fieldset legend={legend()}>
+
+                        <div className="p-col-12">
+                            {data.comment}
+                        </div>
+                        {responsePart}
+                    </Fieldset>
+                </div>
+            );
+        }
+
+        return (
+            <div className="card">
+                <DataView value={this.state.reviews} layout="list" itemTemplate={itemTemplate}  paginator rows={5}></DataView>
+            </div>
+        );
+    }
+
+    render() {
+        if (this.state.loading) {
+            return (
+                <ProgressSpinner />
+            );
+        }
+        else {
+
             const renderHeader = () => {
                 return (
                     <div className="p-grid p-nogutter">
-                            <DataViewLayoutOptions layout={this.state.layout} onChange={(e) => this.setState({layout: e.value})} />
+                        <DataViewLayoutOptions layout={this.state.layout} onChange={(e) => this.setState({ layout: e.value })} />
                     </div>
                 );
             }
-        
             const header = renderHeader();
 
             let restaurant_info = this.state.restaurant_info;
             return (
                 <div>
-                    <br/> <br/>
+                    <br /> <br />
                     <Panel header={restaurant_info.restaurant_name} >
-                        <div className="p-fluid p-formgrid p-grid" > 
-                            <div className="p-field p-col-12 p-md-2" > 
-                                <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" style={{'width': '100%'}}/>
+                        <div className="p-fluid p-formgrid p-grid" >
+                            <div className="p-field p-col-12 p-md-2" >
+                                <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" style={{ 'width': '100%' }} />
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>
-                            <div className="p-field p-col-12 p-md-6" > 
+                            <div className="p-field p-col-12 p-md-6" >
                                 <i className="pi pi-tag restaurant-category-icon"></i><span >{restaurant_info.restaurant_category}</span>
                                 <p> {restaurant_info.description}</p>
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>
-                            <div className="p-field p-col-12 p-md-2" style={{'justifyContent': 'center', 'display': 'flex', 'alignItems': 'center'}}>
+                            <div className="p-field p-col-12 p-md-2" style={{ 'justifyContent': 'center', 'display': 'flex', 'alignItems': 'center' }}>
                                 <Rating value={restaurant_info.rating} readOnly cancel={false} ></Rating>
                             </div>
                         </div>
                     </Panel>
-                    <br/> <br/>
-                    <Panel header={header}> {this.renderCategoryMenus()} </Panel>
-                    <MenuItemDialog chosenMenuItem={this.state.chosenMenuItem} visible={this.state.displayDialog} hideDialog={() => this.setState({displayDialog: false})}/>
+                    <TabView>
+                        <TabPanel header="Restaurant Menu">
+                            <Panel header={header}> {this.renderCategoryMenus()} </Panel>
+                        </TabPanel>
+                        <TabPanel header="Reviews">
+                            <Panel> {this.renderReviewPanel()} </Panel>
+                        </TabPanel>
+                    </TabView>
+                    <MenuItemDialog chosenMenuItem={this.state.chosenMenuItem} visible={this.state.displayDialog} hideDialog={() => this.setState({ displayDialog: false })} />
                 </div>
             );
         }

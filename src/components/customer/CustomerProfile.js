@@ -151,7 +151,7 @@ class CustomerProfile extends React.Component {
                         </ScrollPanel>
                     </div>
 
-                    <div className="p-field p-col-12 p-md-6" style={{ 'border-style': 'solid' }}>
+                    <div className="p-field p-col-12 p-md-6" style={{ 'borderStyle': 'solid' }}>
 
                         <div className="p-float-label" style={{ 'marginTop': '30px' }}>
                             <InputText id="username" type="text" value={this.state.userInfo.username}
