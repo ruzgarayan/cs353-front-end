@@ -53,8 +53,10 @@ class CustomerOrderList extends React.Component {
         const statusList = [
             { label: 'Order Taken' },
             { label: 'Preparing Food' },
+            { label: 'Waiting Courier' },
             { label: 'Delivering' },
-            { label: 'Order Delivered' }
+            { label: 'Delivered-Waiting Your Approval' },
+            { label: 'Delivered-Approved' }
         ];
         const numStatus = statusList.length;
 

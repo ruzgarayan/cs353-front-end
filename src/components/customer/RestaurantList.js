@@ -203,7 +203,7 @@ class RestaurantList extends React.Component {
                         <Panel style={{ 'marginTop': '200px' }} header="Search Options">
                             <div className="p-field-checkbox" style={{ 'justifyContent': 'center' }}>
                                 <Checkbox onChange={e => this.setState({ open: e.checked })} checked={this.state.open} />
-                                <label htmlFor="open" className="p-checkbox-label">Open</label>
+                                <label htmlFor="open" className="p-checkbox-label">Only Open Restaurants</label>
                             </div>
                             <div className="card">
                                 <label htmlFor="minRating" >Min. Rating</label>
