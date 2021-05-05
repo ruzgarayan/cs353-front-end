@@ -59,7 +59,6 @@ class MenuItemDialog extends React.Component {
     fetchIngredientData() {
         this.setState({ loading: true, fetching: true });
         axios.get("/customer/ingredients/id=" + this.props.chosenMenuItem.menuItemId).then((result) => {
-            console.log(result);
             let ingredientData = result.data.data;
 
 
@@ -99,14 +98,12 @@ class MenuItemDialog extends React.Component {
                         }
                     }
                 }
-
                 this.setState({ loading: false, ingredientData: ingredientData, selection: selection, quantity: entryInCart.quantity, alreadyInCart: true , fetching: false});
             }
 
 
             this.setState({ restaurant_info: result.data.data });
         }).catch((error) => {
-            console.log(error);
             toast.error("Error while getting the restaurant info.");
             this.setState({ loading: false, fetching: false, visible: false});
         });
@@ -212,12 +209,15 @@ class MenuItemDialog extends React.Component {
         let visible = this.props.visible;
 
         const renderIngredients = () => {
-            return (
-                <div>
-                    <h5>Select Ingredients</h5>
-                    <SelectButton value={this.state.selection} options={this.state.ingredientData} onChange={(e) => this.setState({ selection: e.value })} optionLabel="displayText" multiple />
-                </div>
-            );
+            if (this.state.ingredientData.length > 0)
+                return (
+                    <div>
+                        <h5>Select Ingredients</h5>
+                        <SelectButton value={this.state.selection} options={this.state.ingredientData} onChange={(e) => this.setState({ selection: e.value })} optionLabel="displayText" multiple />
+                    </div>
+                );
+            else
+                return (<div></div>);
         }
         const ingredients = renderIngredients();
         if (menuItem === null || this.state.loading) {
@@ -250,7 +250,7 @@ class MenuItemDialog extends React.Component {
                     );
             }
             const button = renderButton();
-            console.log(this.state);
+            
             const menuItem = this.props.chosenMenuItem;
             const selection = this.state.selection;
             const quantity = this.state.quantity;
@@ -259,7 +259,7 @@ class MenuItemDialog extends React.Component {
                 ingredientPrice = ingredientPrice + selection[i].additionalPrice;
             }
             const totalPrice = quantity * (menuItem.basePrice + ingredientPrice);
-
+            console.log(menuItem);
             return (
                 <div>
                     <Dialog
@@ -270,6 +270,10 @@ class MenuItemDialog extends React.Component {
                         onHide={() => this.props.hideDialog()}
                     >
 
+                        <i className="pi pi-tag"></i><span >{menuItem.foodCategory}</span>
+                        <h1>{menuItem.name}</h1>
+                        <img src={menuItem.imageLink} alt="" style={{ 'width': '100%' }} />
+                        <p>{menuItem.description}</p>  
                         {ingredients}
 
                         <div style={{ 'marginTop': '30px' }}>
