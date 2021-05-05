@@ -6,6 +6,8 @@ import { DataView, DataViewLayoutOptions } from 'primereact/dataview';
 import React from 'react';
 import { Button } from 'primereact/button';
 import { Rating } from 'primereact/rating';
+import { connect } from 'react-redux';
+import { withRouter } from 'react-router'
 import './styles/restaurantViewStyle.css';
 import 'primeflex/primeflex.css';
 import { toast } from 'react-toastify';
@@ -26,11 +28,12 @@ class RestaurantView extends React.Component {
         category_menus: [],
         displayDialog: false,
         chosenMenuItem: null,
-        reviews: []
+        reviews: [],
+        raffleData: null,
     }
 
     async fetchData() {
-        let success = true;
+        const userId = this.props.loginInfo.userId;
         let restaurantId = this.state.restaurantId;
         this.setState({ loading: true });
 
@@ -38,7 +41,7 @@ class RestaurantView extends React.Component {
         await axios.get("/customer/restaurantInfo/id=" + restaurantId).then((result) => {
             console.log(result);
             if (!result.data.success) {
-                toast.error("Error while getting the restaurant info.");
+                toast.error(result.data.message);
             }
             else
                 this.setState({ restaurant_info: result.data.data });
@@ -50,7 +53,7 @@ class RestaurantView extends React.Component {
         await axios.get("/customer/restaurantMenuByCategory/id=" + restaurantId).then((result) => {
             console.log(result);
             if (!result.data.success) {
-                toast.error("Error while getting the restaurant menu.");
+                toast.error(result.data.message);
             }
             else
                 this.setState({ category_menus: result.data.data });
@@ -60,15 +63,41 @@ class RestaurantView extends React.Component {
 
         //Get reviews
         await axios.get("/review/getReviews/restaurant_id=" + restaurantId).then((result) => {
-            console.log(result);
             if (!result.data.success) {
-                toast.error("Error while getting the reviews.");
+                toast.error(result.data.message);
             }
             else
                 this.setState({ reviews: result.data.data });
         }).catch((error) => {
             toast.error("Error while getting the reviews.");
         });
+
+        //Get raffle data
+        await axios.get("/raffle/getRaffle/restaurant_id=" + restaurantId).then((result) => {
+            if (!result.data.success) {
+                toast.error(result.data.message);
+            }
+            else {
+                let raffleData = result.data.data;
+                if (raffleData !== null) {
+
+                    axios.get("/raffle/getEntryAmount/restaurant_id=" + restaurantId + "/customer_id=" + userId).then((result) => {
+                        if (!result.data.success) {
+                            toast.error(result.data.message);
+                        }
+                        else {
+                            raffleData.entryAmount = result.data.data;
+                            this.setState({ raffleData: raffleData });
+                        }
+                    }).catch((error) => {
+                        toast.error("Error while getting the raffle data.");
+                    });
+                }
+            }
+        }).catch((error) => {
+            toast.error("Error while getting the raffle data.");
+        });
+
         this.setState({ loading: false });
     }
 
@@ -192,8 +221,33 @@ class RestaurantView extends React.Component {
 
         return (
             <div className="card">
-                <DataView value={this.state.reviews} layout="list" itemTemplate={itemTemplate}  paginator rows={5}></DataView>
+                <DataView value={this.state.reviews} layout="list" itemTemplate={itemTemplate} paginator rows={5}></DataView>
             </div>
+        );
+    }
+
+    renderRaffleInformation() {
+        const raffleData = this.state.raffleData;
+        if (raffleData === null) {
+            return (
+                <Fieldset legend="Ongoing Lottaery">
+                    <div>Currently there is no lotteary for this restaurant.</div>
+                </Fieldset>
+            );
+        }
+        const startingDate = new Date(raffleData.startingDate).toUTCString();
+        const startingDateFromNow = moment(startingDate).fromNow();
+        const endingDate = new Date(raffleData.endingDate).toUTCString();
+        const endingDateFromNow = moment(endingDate).fromNow();
+
+        return (
+            <Fieldset legend="Ongoing Lottaery">
+                <div>Started: {startingDateFromNow}</div>
+                <div>Ending: {endingDateFromNow}</div>
+                <div>Prize: {raffleData.couponPrize}$</div>
+                <div>Gain 1 entry for every {raffleData.minEntryPrice}$</div>
+                <div>Your entries: {raffleData.entryAmount}</div>
+            </Fieldset>
         );
     }
 
@@ -230,7 +284,13 @@ class RestaurantView extends React.Component {
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>
                             <div className="p-field p-col-12 p-md-2" style={{ 'justifyContent': 'center', 'display': 'flex', 'alignItems': 'center' }}>
-                                <Rating value={restaurant_info.rating} readOnly cancel={false} ></Rating>
+                                <div className="p-field p-col-12" >
+                                    <Rating value={restaurant_info.rating} readOnly cancel={false} style={{ 'marginBottom': '20px' }}></Rating>
+                                    <div className="p-field p-col-12">
+                                        {this.renderRaffleInformation()}
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </Panel>
@@ -248,5 +308,10 @@ class RestaurantView extends React.Component {
         }
     }
 }
-
+const mapStateToProps = state => {
+    return {
+        loginInfo: state.loginInfo
+    };
+};
+RestaurantView = withRouter(connect(mapStateToProps)(RestaurantView))
 export default RestaurantView;
