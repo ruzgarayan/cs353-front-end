@@ -103,6 +103,7 @@ class FinalizeOrderPage extends React.Component {
         const price = cartInfo.totalPrice;
         const optionalDeliveryTime = this.state.deliverNow ? null : this.state.optionalDeliveryTime;
         const paymentMethod = this.state.paymentMethod.name;
+        const coupon = cartInfo.usedCoupon.couponId;
 
         let selectedMenuItems = [];
         console.log(cartItems);
@@ -124,6 +125,7 @@ class FinalizeOrderPage extends React.Component {
             price: price,
             optionalDeliveryTime: optionalDeliveryTime,
             paymentMethod: paymentMethod,
+            coupon: coupon,
 
             selectedMenuItems: selectedMenuItems
         };
