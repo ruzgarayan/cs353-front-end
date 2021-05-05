@@ -1,6 +1,7 @@
 import { routerReducer } from 'react-router-redux';
 
 import { combineReducers, createStore } from 'redux';
+import { toast } from "react-toastify";
 
 const INITIAL_LOGIN_INFO = {
     loggedIn: false,
@@ -70,24 +71,43 @@ export const cartInfo = (state = INITIAL_CART_INFO, action) => {
                     newCartItems = [...newCartItems, oldCartItems[i]];
                 }
             }
+            if (newPrice < 0)
+            {
+                toast.error("Your cart total becomes negative, you need to remove your coupon first.");
+                return state;
+            }
+
             return { ...state, totalPrice: newPrice, cartItems: newCartItems };
         case "EMPTY":
             return INITIAL_CART_INFO;
         case "REMOVE":
             oldCartItems = state.cartItems;
-            newPrice = 0;
+            newPrice = state.totalPrice;
             newCartItems = [];
             for (var i = 0; i < oldCartItems.length; i++) {
                 if (oldCartItems[i].menuItemId !== action.removedMenuItemId) {
                     newPrice = newPrice + oldCartItems[i].price;
                     newCartItems = [...newCartItems, oldCartItems[i]];
                 }
+                else {
+                    newPrice -= oldCartItems[i].price;
+                }
+            }
+            if (newPrice < 0)
+            {
+                toast.error("Your cart total becomes negative, you need to remove your coupon first.");
+                return state;
             }
 
             return { ...state, totalPrice: newPrice, cartItems: newCartItems };
         case "APPLY_COUPON":
             newPrice = state.totalPrice - action.couponData.discountAmount;
-            return { ...state, totalPrice: newPrice, usedCoupon: action.couponData};
+            return { ...state, totalPrice: newPrice, usedCoupon: action.couponData };
+        case "REMOVE_COUPON":
+            if (state.usedCoupon === null) return state;
+
+            newPrice = state.totalPrice + state.usedCoupon.discountAmount;
+            return { ...state, totalPrice: newPrice, usedCoupon: null};
         default:
             return state;
     }

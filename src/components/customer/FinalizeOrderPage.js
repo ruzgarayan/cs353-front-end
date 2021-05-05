@@ -88,17 +88,6 @@ class FinalizeOrderPage extends React.Component {
         );
     }
 
-    renderCoupon() {
-        const couponData = this.props.cartInfo.coupon;
-        return (
-            <div >
-                <Card title={couponData.coupon_id} style={{ 'border-style': 'dashed' }}>
-                    <div >{couponData.amount}$ discount in {couponData.restaurant_name}</div>
-                </Card>
-            </div>
-        );
-    }
-
     makeOrder() {
         const cartInfo = this.props.cartInfo;
         const loginInfo = this.props.loginInfo;
@@ -150,8 +139,12 @@ class FinalizeOrderPage extends React.Component {
     applyCoupon(couponId) {        
         const cartInfo = this.props.cartInfo;
         const cartItems = cartInfo.cartItems;
-        if (cartItems.length == 0) {
+        if (cartItems.length === 0) {
             toast.error("Your cart is empty.");
+            return;
+        }
+        if (cartInfo.usedCoupon !== null) {
+            toast.error("You already have an applied coupon.");
             return;
         }
         const restaurantId = cartInfo.cartItems[0].menuItemData.restaurantId;
@@ -161,7 +154,11 @@ class FinalizeOrderPage extends React.Component {
             if (result.data.success)
             {
                 const couponData = result.data.data;
-                console.log(couponData);
+                if (couponData.discountAmount > cartInfo.totalPrice)
+                {
+                    toast.error("The discount amount of the coupon is " + couponData.discountAmount + "$. It must be less than the cart total.");
+                    return;
+                } 
                 const applyCouponAction = () => {
                     return {
                     type: "APPLY_COUPON",
@@ -174,6 +171,16 @@ class FinalizeOrderPage extends React.Component {
                 toast.error(result.data.message);
             }
         }).catch((error) => {});
+    }
+
+    removeCoupon()
+    {
+        const removeCouponAction = () => {
+            return {
+            type: "REMOVE_COUPON"
+        };
+        }
+        store.dispatch(removeCouponAction());
     }
 
     render() {
@@ -199,6 +206,9 @@ class FinalizeOrderPage extends React.Component {
                 return (
                 <Card title={couponInfo.couponId} style={{ 'borderStyle': 'dashed' }}>
                     <div >{couponInfo.discountAmount}$ discount in {couponInfo.restaurantName}</div>
+                    <div> <Button label="Remove Coupon" className="p-button-danger p-button-text" style={{'width':'200px', 'marginTop':'20px'}}
+                        onClick={()=>{this.removeCoupon()}}
+                    /></div>
                 </Card>
                 );
             }
