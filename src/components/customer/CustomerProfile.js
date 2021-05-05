@@ -11,6 +11,9 @@ import { Card } from 'primereact/card';
 import { ScrollPanel } from 'primereact/scrollpanel';
 import { ListBox } from 'primereact/listbox';
 import { toast } from 'react-toastify';
+import ImageUploader from 'react-images-upload';
+import firebase from "./../../firebase/firebase"
+import FileUploader from "react-firebase-file-uploader";
 
 import React from 'react';
 
@@ -29,10 +32,12 @@ class CustomerProfile extends React.Component {
             address: "",
             userType: "",
             region_id: null,
+            image: "",
         },
 
         coupons: null,
-
+        imageProgress: 0,
+        imageLoading: false,
         regions: [],
 
         selectedRegion: null
@@ -119,8 +124,9 @@ class CustomerProfile extends React.Component {
         );
     }
 
-    saveChanges() {
+    async saveChanges() {
         let userId = this.props.loginInfo.userId;
+        console.log(this.state.userInfo);
         axios.post("/customer/customerData/id=" + userId, this.state.userInfo).then((result) => {
 
             if (result.data.success)
@@ -141,6 +147,10 @@ class CustomerProfile extends React.Component {
             );
         }
         else {
+            const renderUploadProgress = () => {
+                if (this.state.imageLoading)
+                    return (<div> Uploading the image, progress {this.state.imageProgress}%</div>)
+            }
             return (
 
                 <div className="p-fluid p-formgrid p-grid">
@@ -207,6 +217,35 @@ class CustomerProfile extends React.Component {
                         </div>
 
                         <br />
+                    </div>
+                    <div className="p-field p-col-12 p-md-3" >
+                        <img src={this.state.userInfo.image} alt="" style={{ 'width': '100%' }} 
+                        onError={(e)=>{e.target.onerror = null; e.target.src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}}/>
+                        <FileUploader
+                            accept="image/*"
+                            name="avatar"
+                            randomizeFilename
+                            storageRef={firebase.storage().ref("images")}
+                            onUploadStart={(progress) => { this.setState({ imageLoading: true, imageProgress: 0 }) }}
+                            onUploadError={(error) => { this.setState({ imageLoading: false, imageProgress: 0 }); toast.error("Error during the image upload.") }}
+                            onUploadSuccess={(filename) => {
+                                firebase
+                                    .storage()
+                                    .ref("images")
+                                    .child(filename)
+                                    .getDownloadURL()
+                                    .then(url => {
+                                        this.setState({ imageLoading: false, userInfo: {...this.state.userInfo, image:url} });
+                                        toast.success("Image successfully uploaded. Use the Save Changes button for changing your profile picture.");
+                                    });
+
+                            }}
+                            onProgress={(progress) => { this.setState({ imageProgress: progress }); }}
+                        />
+
+                        {
+                            renderUploadProgress()
+                        }
                     </div>
                 </div>
 
