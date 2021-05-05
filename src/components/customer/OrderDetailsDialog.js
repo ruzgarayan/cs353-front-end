@@ -5,110 +5,65 @@ import 'primereact/resources/primereact.css';
 import axios from "axios";
 import React from 'react';
 import { Dialog } from 'primereact/dialog';
-import { Button } from 'primereact/button';
-import { InputNumber } from 'primereact/inputnumber';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { DataView } from 'primereact/dataview';
 import { SelectButton } from 'primereact/selectbutton';
 import { toast } from "react-toastify";
-import store from './../../reducers/index.js'
-import { connect } from 'react-redux';
-import { withRouter } from 'react-router'
+import { Timeline } from 'primereact/timeline';
+import { Card } from 'primereact/card';
 
-class OrderDetailsDialog extends React.Component
-{
+class OrderDetailsDialog extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            chosenOrder: null,
-            orderData: [],
+            orderData: null,
             loading: true,
             fetching: false
         };
     }
 
-    renderItemList() {
-        const cartItems = this.props.cartInfo.cartItems;
-
-        const renderItem = (data) => {
-            return (
-                <div className="p-col-12">
-                    <div className="product-list-item">
-                        <img src={data.menuItemData.imageLink} onError={(e) => e.target.src = 'https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.name} />
-                        <div className="product-list-detail">
-                            <div className="product-name">{data.menuItemData.name}</div>
-                            <div className="product-description">{data.menuItemData.description}</div>
-                        </div>
-                        <div className="product-list-action">
-                            <span className="product-price">Quantity: {data.quantity} Price: {data.price}$</span>
-                            <Button icon="pi pi-pencil" label="Edit" onClick={() => this.showMenuItemDialog(data.menuItemData)}></Button>
-                        </div>
-                    </div>
-                </div>
-            );
-        }
-
-        const itemTemplate = (menuItem, layout) => {
-            if (!menuItem) {
-                return;
-            }
-            return renderItem(menuItem);
-        }
-
-        const renderHeader = () => {
-            return (
-                <span>Cart<Button style={{ 'float': 'right' }} label="" className="p-button-danger" icon='pi pi-fw pi-trash'
-                    onClick={() => {
-                        const emptyCartAction = () => {
-                            return {
-                                type: "EMPTY"
-                            }
-                        }
-
-                        store.dispatch(emptyCartAction());
-                    }} /></span>
-
-            );
-        }
-        const header = renderHeader();
-
-        return (
-            <div className="dataview-demo" >
-                <div className="card">
-                    <DataView emptyMessage="Your cart is empty." value={cartItems} layout={'list'} header={header} itemTemplate={itemTemplate} />
-                </div>
-            </div>
-        );
-    }
-
     componentDidUpdate(prevProps) {
-        console.log(this.props);
         if (this.state.fetching) {
             return;
         }
-        
+
         if (!prevProps.visible && this.props.visible) {
             this.fetchOrderData();
         }
     }
 
-    fetchOrderData() {
+    async fetchOrderData() {
+        const chosenOrder = this.props.chosenOrder;
         this.setState({ loading: true, fetching: true });
-        
+        if (chosenOrder === null) {
+            this.setState({ loading: false, fetching: false, orderData: null });
+            return;
+        }
+
+        await axios.get("/customer/getOrderDetails/order_id=" + chosenOrder.orderId).then((result) => {
+            if (result.data.success) {
+                this.setState({ orderData: result.data.data });
+            }
+            else {
+                toast.error(result.data.message);
+            }
+        }).catch((error) => {
+            toast.error("Connection error.");
+        });
+
         this.setState({ loading: false, fetching: false });
     }
 
     render() {
-        let orderDetails = this.state.chosenOrder;
+        let orderData = this.state.orderData;
         let visible = this.props.visible;
-        console.log(visible);
 
-        if (orderDetails === null || this.state.loading) {
+        if (orderData === null || this.state.loading) {
             return (
                 <Dialog
                     header="Loading..."
                     visible={visible}
-                    style={{ width: '50vw'}}
+                    style={{ width: '50vw' }}
                     modal={true}
                     onHide={() => this.props.hideDialog()}
                 ><ProgressSpinner></ProgressSpinner>
@@ -117,33 +72,101 @@ class OrderDetailsDialog extends React.Component
 
         }
         else {
+
+            const renderItemList = () => {
+                const renderItem = (data) => {
+                    let price = data.menuItem.basePrice;
+                    const ingredients = data.selectedIngredients;
+                    for (var i = 0; i < ingredients.length; i++) {
+                        price += ingredients[i].additionalPrice;
+                        let displayText = ingredients[i].ingredientName + " " + (ingredients[i].additionalPrice === 0 ? "(Free)" : "(" + ingredients[i].additionalPrice + "$)");
+                        ingredients[i].displayText = displayText;
+                    }
+                    price *= data.quantity;
+
+                    return (
+                        <div className="p-col-12">
+                            <div className="product-list-item">
+                                <img src={data.menuItem.imageLink} onError={(e) => e.target.src = 'https://www.primefaces.org/wp-content/uploads/2020/05/placeholder.png'} alt={data.menuItem.name} />
+                                <div className="product-list-detail">
+                                    <div className="product-name">{data.menuItem.name}</div>
+                                    <div className="product-description">{data.menuItem.description}</div>
+                                </div>
+                                <div className="product-list-action">
+                                    <span className="product-price">Quantity: {data.quantity} Price: {price}$</span>
+                                </div>
+                            </div>
+                            <div className="p-col-12">
+                                <SelectButton value={ingredients} options={ingredients} disabled={true} optionLabel="displayText" multiple />
+                            </div>
+                        </div>
+                    );
+                }
+
+                const itemTemplate = (menuItem, layout) => {
+                    if (!menuItem) {
+                        return;
+                    }
+                    return renderItem(menuItem);
+                }
+
+                return (
+                    <div className="dataview-demo" >
+                        <div className="card">
+                            <DataView emptyMessage="This order is empty." value={orderData.selectedMenuItems} layout={'list'} header="Order items" itemTemplate={itemTemplate} />
+                        </div>
+                    </div>
+                );
+            }
+            const dialogHeader = "Your order from " + orderData.order.restaurantName;
+            console.log(orderData);
+            const couponText = (orderData.order.coupon === null) ? "" : <div><h2>Used coupon: {orderData.order.coupon}</h2></div>;
+
+            const timelineData = [
+                { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-check', color: '#00FF00', },
+                { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-check', color: '#00FF00' },
+                { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-times', color: '#FF0000' },
+                { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-times', color: '#FF0000' },
+            ];
+            const customizedMarker = (item) => {
+                return (
+                    <span className="custom-marker p-shadow-2" style={{ backgroundColor: item.color }}>
+                        <i className={item.icon}></i>
+                    </span>
+                );
+            };
+
             return (
                 <div>
                     <Dialog
-                        header="a"
+                        header={dialogHeader}
                         visible={visible}
-                        style={{ width: '50vw', height: '100' }}
+                        style={{ width: '70vw', height: '100' }}
                         modal={true}
                         onHide={() => this.props.hideDialog()}
                     >
 
-                        b
-
-                        <div style={{ 'marginTop': '30px' }}>
-                            <div className="p-fluid p-formgrid p-grid">
-                                <div className="p-field p-col-12 p-md-4" ></div>
-                                <div className="p-field p-col-12 p-md-2" >
-                                    <InputNumber id="vertical" value={this.state.quantity}
-                                        onValueChange={(e) => this.setState({ quantity: e.value })} mode="decimal"
-                                        showButtons buttonLayout="vertical" style={{ 'width': '4em' }}
-                                        decrementButtonClassName="p-button-secondary" incrementButtonClassName="p-button-secondary"
-                                        incrementButtonIcon="pi pi-plus" decrementButtonIcon="pi pi-minus" />
-                                </div>
-                                <div className="p-field p-col-12 p-md-4" >
-                                    <label> a </label> b
-                                </div>
-                            </div>
+                        <div className="p-col-12">
+                            {renderItemList()}
                         </div>
+
+                        <div className="p-col-12">
+                            <Card>
+                            <div className="p-grid">
+                                <div className="p-col-12 p-md-9">
+                                <div className="p-col-12">
+                                    <div><h2>Payment Method: {orderData.order.paymentMethod}</h2></div>
+                                    {couponText}
+                                    <div><h2>Total price: {orderData.order.price}$</h2></div>
+                                    <div><h2>Order status: {orderData.order.status}</h2></div>
+                                </div></div>
+                                <div className="p-col-12 p-md-3">
+                                    <Timeline value={timelineData} marker={customizedMarker} opposite={(item) => item.status} content={(item) => <small className="p-text-secondary">{item.date}</small>} />
+                                </div>
+                                </div>
+                            </Card>
+                        </div>
+
                     </Dialog>
                 </div>
             );
@@ -152,10 +175,4 @@ class OrderDetailsDialog extends React.Component
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        cartInfo: state.cartInfo
-    };
-};
-OrderDetailsDialog = withRouter(connect(mapStateToProps)(OrderDetailsDialog));
 export default OrderDetailsDialog;
