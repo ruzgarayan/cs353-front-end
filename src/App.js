@@ -25,6 +25,8 @@ import 'primereact/resources/primereact.css';
 import 'primeflex/primeflex.css';
 import RestaurantList from './components/customer/RestaurantList';
 import FinalizeOrderPage from './components/customer/FinalizeOrderPage';
+import RestaurantMenuBar from './components/restaurant/RestaurantMenuBar';
+import RestaurantProfile from './components/restaurant/RestaurantProfile';
 
 
 class App extends React.Component {
@@ -53,7 +55,8 @@ class App extends React.Component {
                                     <Route path="/customer/finalizeOrder" exact component={FinalizeOrderPage} />
                                     <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
                                     <Route path="/courier" component={MainCourierPage} />
-                                    <Route path="/restaurant" component={MainRestaurantPage} />
+                                    <Route path="/restaurant" component={RestaurantMenuBar} />
+                                    <Route path="/restaurant/profile" exact component={RestaurantProfile} />
                                 
                                 {//</Switch>
                                 }

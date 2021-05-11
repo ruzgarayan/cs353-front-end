@@ -275,7 +275,8 @@ class RestaurantView extends React.Component {
                     <Panel header={restaurant_info.restaurant_name} >
                         <div className="p-fluid p-formgrid p-grid" >
                             <div className="p-field p-col-12 p-md-2" >
-                                <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" style={{ 'width': '100%' }} />
+                                <img src={restaurant_info.image} alt="" style={{'height': '100%' }}
+                                    onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>
                             <div className="p-field p-col-12 p-md-6" >

@@ -154,7 +154,7 @@ class RestaurantList extends React.Component {
         console.log(this.state);
         const favorites = this.state.favorites;
         const itemTemplate = (data) => {
-
+            console.log(data);
             const renderFavoriteButtons = () => {
                 for (var i = 0; i < favorites.length; i++) {
                     if (data.restaurantId === favorites[i]) {
@@ -176,7 +176,8 @@ class RestaurantList extends React.Component {
             }
             return (
                 <div className="restaurant-item">
-                    <img src={`https://sampiyon-kokorec.developerkitchen.com/img/default-1.jpg`} alt="" />
+                    <img src={data.image} alt="" 
+                    onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
                     <div className="restaurant-detail">
                         <div className="restaurant-name">{data.restaurant_name}</div>
                         <div className="restaurant-description">{data.description}</div>

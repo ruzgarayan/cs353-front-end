@@ -103,7 +103,7 @@ class FinalizeOrderPage extends React.Component {
         const price = cartInfo.totalPrice;
         const optionalDeliveryTime = this.state.deliverNow ? null : this.state.optionalDeliveryTime;
         const paymentMethod = this.state.paymentMethod.name;
-        const coupon = cartInfo.usedCoupon.couponId;
+        const coupon = (cartInfo.usedCoupon === null) ? null : cartInfo.usedCoupon.couponId;
 
         let selectedMenuItems = [];
         console.log(cartItems);
@@ -132,7 +132,19 @@ class FinalizeOrderPage extends React.Component {
         console.log(orderData);
 
         axios.post("/customer/order", orderData).then((result) => {
-            console.log(result);
+            if (result.data.success)
+            {
+                const emptyCartAction = () => {
+                    return {
+                        type: "EMPTY"
+                    }
+                }
+
+                store.dispatch(emptyCartAction());
+                toast.success(result.data.message);
+            } else {
+                toast.error(result.data.message);
+            }
         }).catch((error) => {
 
         });

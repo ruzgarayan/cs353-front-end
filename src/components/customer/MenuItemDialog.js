@@ -76,7 +76,7 @@ class MenuItemDialog extends React.Component {
 
             if (entryInCart === null) {
                 for (var i = 0; i < ingredientData.length; i++) {
-                    if (ingredientData[i].default)
+                    if (ingredientData[i].defaultIngredient)
                         selection = [...selection, ingredientData[i]];
 
                     let displayText = ingredientData[i].ingredientName + " " + (ingredientData[i].additionalPrice === 0 ? "(Free)" : "(" + ingredientData[i].additionalPrice + "$)");

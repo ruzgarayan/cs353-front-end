@@ -3,64 +3,95 @@ import 'primereact/resources/primereact.css';
 
 import React from 'react';
 import { Button } from 'primereact/button';
-import {InputText} from 'primereact/inputtext';
+import { InputText } from 'primereact/inputtext';
 import axios from 'axios';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
 import { withRouter } from 'react-router'
 import store from './../../reducers/index.js'
 
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
 
 class LoginPage extends React.Component {
 
-    
+
     state = {
         username: "",
         password: ""
     };
 
-    constructor(props)
-    {
+    constructor(props) {
         super(props);
         console.log(props);
     }
 
-    deneme()
-    {
+    deneme() {
 
     }
 
-    login()
-    {
-        let loginPostInfo = {username: this.state.username, password: this.state.password};
+    async login() {
+        let loginPostInfo = { username: this.state.username, password: this.state.password };
 
-        axios.post("/login", loginPostInfo).then((result) => {
-            if (result.data.success)
-            {
+        await axios.post("/login", loginPostInfo).then((result) => {
+            if (result.data.success) {
                 toast.success(result.data.message);
                 toast.success("Welcome, " + result.data.data.name + " " + result.data.data.surname);
 
-                const loginAction = () => {
-                    return {
-                        type: "LOGIN",
-                        newState: {
-                            loggedIn: true,
-                            userId: result.data.data.userId,
-                            token: null
+                const userId = result.data.data.userId;
+
+                let restaurantId = null;
+                if (result.data.data.userType === 'Restaurant Owner') {
+                    axios.get("/restaurant/getRestaurantId/owner_id=" + userId).then((result2) => {
+                        console.log(result2);
+                        if (result2.data.success) {
+
+                            let loginAction = () => {
+                                return {
+                                    type: "LOGIN",
+                                    newState: {
+                                        loggedIn: true,
+                                        userId: userId,
+                                        token: null,
+                                        restaurantId: result2.data.data
+                                    }
+                                }
+                            }
+
+                            store.dispatch(loginAction());
+                            this.props.history.push('/restaurant/activeOrders');
+                        }
+                        else {
+                            toast.error(result2.data.message);
+                        }
+                    }).catch((error) => {
+                        toast.error("Error during the connection.");
+                    });
+
+
+                }
+                else {
+
+                    let loginAction = () => {
+                        return {
+                            type: "LOGIN",
+                            newState: {
+                                loggedIn: true,
+                                userId: userId,
+                                token: null,
+                                restaurantId: null
+                            }
                         }
                     }
+                    store.dispatch(loginAction());
+
+                    if (result.data.data.userType === 'Customer')
+                        this.props.history.push('/customer/restaurants');
+                    else if (result.data.data.userType === 'Courier')
+                        this.props.history.push('/courier/main');
+                    else
+                        toast.error("Incorrect user type.");
                 }
 
-                store.dispatch(loginAction());
 
-                if (result.data.data.userType === 'Customer')
-                    this.props.history.push('/customer/restaurants');
-                else if (result.data.data.userType === 'Courier')
-                    this.props.history.push('/courier/main');
-                else if (result.data.data.userType === 'Restaurant Owner')
-                    this.props.history.push('/restaurant/main');
-                else    
-                    toast.error("Incorrect user type.");
             }
             else
                 toast.error(result.data.message);
@@ -74,35 +105,35 @@ class LoginPage extends React.Component {
     render() {
         return (
             <div>
-                <br/><div className="p-fluid p-formgrid p-grid">
+                <br /><div className="p-fluid p-formgrid p-grid">
                     <div className="p-field p-col-12 p-md-5"></div>
 
                     <div className="p-field p-col-12 p-md-2">
                         <span className="p-float-label">
                             <InputText id="username" type="text" value={this.state.username}
-                         onChange={(e) => this.setState({username: e.target.value})} />
-                         <label>Username</label>
+                                onChange={(e) => this.setState({ username: e.target.value })} />
+                            <label>Username</label>
                         </span>
                     </div>
                 </div>
 
-                <br/><div className="p-fluid p-formgrid p-grid">
+                <br /><div className="p-fluid p-formgrid p-grid">
                     <div className="p-field p-col-12 p-md-5"></div>
 
                     <div className="p-field p-col-12 p-md-2">
                         <span className="p-float-label">
-                        <InputText id="password" type="password" value={this.state.password}
-                        onChange={(e) => this.setState({password: e.target.value})} />
-                         <label>Password</label>
+                            <InputText id="password" type="password" value={this.state.password}
+                                onChange={(e) => this.setState({ password: e.target.value })} />
+                            <label>Password</label>
                         </span>
                     </div>
                 </div>
 
-                <br/><div className="p-fluid p-formgrid p-grid">
+                <br /><div className="p-fluid p-formgrid p-grid">
                     <div className="p-field p-col-12 p-md-5"></div>
 
                     <div className="p-field p-col-12 p-md-2">
-                        <Button label="Login" onClick={() => this.login()}/>
+                        <Button label="Login" onClick={() => this.login()} />
                     </div>
                 </div>
             </div>
@@ -110,7 +141,7 @@ class LoginPage extends React.Component {
     }
 }
 
-const mapStateToProps = state => { 
+const mapStateToProps = state => {
     return {
         loginInfo: state.loginInfo
     };

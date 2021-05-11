@@ -6,7 +6,8 @@ import { toast } from "react-toastify";
 const INITIAL_LOGIN_INFO = {
     loggedIn: false,
     userId: null,
-    token: null
+    token: null,
+    restaurantId: null
 }
 
 const INITIAL_CART_INFO = {
