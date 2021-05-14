@@ -179,10 +179,10 @@ class RestaurantList extends React.Component {
                     <img src={data.image} alt="" 
                     onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
                     <div className="restaurant-detail">
-                        <div className="restaurant-name">{data.restaurant_name}</div>
+                        <div className="restaurant-name">{data.restaurantName}</div>
                         <div className="restaurant-description">{data.description}</div>
                         <Rating value={data.rating} readOnly cancel={false}></Rating>
-                        <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.restaurant_category}</span>
+                        <i className="pi pi-tag restaurant-category-icon"></i><span className="restaurant-category">{data.restaurantCategory}</span>
                     </div>
                     <div className="restaurant-action">
                         {renderFavoriteButtons()}

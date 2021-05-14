@@ -6,33 +6,28 @@ import { Menubar } from 'primereact/menubar';
 import store from '../../reducers/index.js'
 
 
-class RestaurantMenuBar extends React.Component {
+class CourierMenuBar extends React.Component {
 
     componentDidMount() {
-        
+
     }
 
     render() {
         const items = [
             {
-                label: 'Active orders',
+                label: 'Assignments',
                 icon: 'pi pi-fw pi-sitemap',
-                command: () => { this.props.history.push('/restaurant/activeOrders'); }
+                command: () => { this.props.history.push('/courier/assignments'); }
             },
             {
                 label: 'Finalized Orders',
                 icon: 'pi pi-fw pi-user',
-                command: () => { this.props.history.push('/restaurant/finalizedOrders'); }
-            },
-            {
-                label: 'Modify Menu',
-                icon: 'pi pi-fw pi-sitemap',
-                command: () => { this.props.history.push('/restaurant/modifyMenu'); }
+                command: () => { this.props.history.push('/courier/finalizedOrders'); }
             },
             {
                 label: 'Profile',
                 icon: 'pi pi-fw pi-user',
-                command: () => { this.props.history.push('/restaurant/profile'); }
+                command: () => { this.props.history.push('/courier/profile'); }
             },
             {
                 label: 'Logout',
@@ -64,4 +59,4 @@ class RestaurantMenuBar extends React.Component {
     }
 }
 
-export default RestaurantMenuBar;
+export default CourierMenuBar;

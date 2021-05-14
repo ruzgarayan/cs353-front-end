@@ -272,15 +272,15 @@ class RestaurantView extends React.Component {
             return (
                 <div>
                     <br /> <br />
-                    <Panel header={restaurant_info.restaurant_name} >
+                    <Panel header={restaurant_info.restaurantName} >
                         <div className="p-fluid p-formgrid p-grid" >
-                            <div className="p-field p-col-12 p-md-2" >
-                                <img src={restaurant_info.image} alt="" style={{'height': '100%' }}
+                            <div className="p-field p-col-12 p-md-4" >
+                                <img src={restaurant_info.image} alt="" style={{'width': '100%' }}
                                     onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>
-                            <div className="p-field p-col-12 p-md-6" >
-                                <i className="pi pi-tag restaurant-category-icon"></i><span >{restaurant_info.restaurant_category}</span>
+                            <div className="p-field p-col-12 p-md-4" >
+                                <i className="pi pi-tag restaurant-category-icon"></i><span >{restaurant_info.restaurantCategory}</span>
                                 <p> {restaurant_info.description}</p>
                             </div>
                             <div className="p-field p-col-12 p-md-1" ></div>

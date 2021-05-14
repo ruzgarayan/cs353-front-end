@@ -125,11 +125,12 @@ class RestaurantProfile extends React.Component {
     }
 
     onChange = async (event) => {
-        console.log(event);
-        console.log(this.state);
         const oldServedRegions = this.state.servedRegions;
         const newServedRegions = event.target;
         const restaurantId = this.props.loginInfo.restaurantId;
+
+        console.log(oldServedRegions);
+        console.log(newServedRegions);
 
         var i, j, flag;
         for (i = 0; i < oldServedRegions.length; i++) {
@@ -259,7 +260,7 @@ class RestaurantProfile extends React.Component {
 
                         <div>
                             <PickList source={this.state.otherRegions} target={this.state.servedRegions} itemTemplate={this.itemTemplate}
-                                sourceHeader="Served Regions" targetHeader="Others"
+                                sourceHeader="Others" targetHeader="Served Regions"
                                 sourceStyle={{ height: '342px' }} targetStyle={{ height: '342px' }}
                                 onChange={this.onChange}
                                 showSourceControls={false}  

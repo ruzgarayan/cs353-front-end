@@ -86,7 +86,7 @@ class LoginPage extends React.Component {
                     if (result.data.data.userType === 'Customer')
                         this.props.history.push('/customer/restaurants');
                     else if (result.data.data.userType === 'Courier')
-                        this.props.history.push('/courier/main');
+                        this.props.history.push('/courier/assignments');
                     else
                         toast.error("Incorrect user type.");
                 }

@@ -27,6 +27,11 @@ import RestaurantList from './components/customer/RestaurantList';
 import FinalizeOrderPage from './components/customer/FinalizeOrderPage';
 import RestaurantMenuBar from './components/restaurant/RestaurantMenuBar';
 import RestaurantProfile from './components/restaurant/RestaurantProfile';
+import CourierMenuBar from './components/courier/CourierMenuBar';
+import CourierProfile from './components/courier/CourierProfile';
+import AssignmentPage from './components/courier/AssignmentsPage';
+import CourierFinalizedOrders from './components/courier/CourierFinalizedOrders';
+import RestaurantModifyMenu from './components/restaurant/RestaurantModifyMenu';
 
 
 class App extends React.Component {
@@ -54,9 +59,13 @@ class App extends React.Component {
                                     <Route path="/customer/favorites" exact component={CustomerFavorites} />
                                     <Route path="/customer/finalizeOrder" exact component={FinalizeOrderPage} />
                                     <Route path="/customer/restaurantPage/:id" exact component={RestaurantView} />
-                                    <Route path="/courier" component={MainCourierPage} />
+                                    <Route path="/courier" component={CourierMenuBar} />
+                                    <Route path="/courier/profile" component={CourierProfile} />
+                                    <Route path="/courier/assignments" exact component={AssignmentPage} />
+                                    <Route path="/courier/finalizedOrders" exact component={CourierFinalizedOrders} />
                                     <Route path="/restaurant" component={RestaurantMenuBar} />
                                     <Route path="/restaurant/profile" exact component={RestaurantProfile} />
+                                    <Route path="/restaurant/modifyMenu" exact component={RestaurantModifyMenu} />
                                 
                                 {//</Switch>
                                 }
