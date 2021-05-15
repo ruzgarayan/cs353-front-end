@@ -59,8 +59,7 @@ class AssignmentPage extends React.Component {
     acceptAssignment(order_id) {
         const userId = this.props.loginInfo.userId;
         axios.post("/courier/acceptAssignment/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
-            if (result.data.success)
-            {
+            if (result.data.success) {
                 toast.success(result.data.message);
             } else {
                 toast.error(result.data.message);
@@ -73,8 +72,7 @@ class AssignmentPage extends React.Component {
     rejectAssignment(order_id) {
         const userId = this.props.loginInfo.userId;
         axios.post("/courier/rejectAssignment/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
-            if (result.data.success)
-            {
+            if (result.data.success) {
                 toast.success(result.data.message);
             } else {
                 toast.error(result.data.message);
@@ -87,8 +85,7 @@ class AssignmentPage extends React.Component {
     finalizeOrder(order_id) {
         const userId = this.props.loginInfo.userId;
         axios.post("/courier/finalizeOrder/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
-            if (result.data.success)
-            {
+            if (result.data.success) {
                 toast.success(result.data.message);
             } else {
                 toast.error(result.data.message);
@@ -102,6 +99,7 @@ class AssignmentPage extends React.Component {
 
         const itemTemplate = (data) => {
             const order = data.order;
+            const customerInfo = data;
             const orderTime = new Date(order.orderTime).toUTCString();
             const timeFromNow = moment(orderTime).fromNow();
 
@@ -111,31 +109,78 @@ class AssignmentPage extends React.Component {
                     status = i;
             }
 
-            return (
-                    <div className="p-col-12" style={{'width': '%100'}}>
-                        <div className="p-col-12">
-                            <div className="p-grid">
-                                <div className="p-col-12 p-md-4">
-                                    <div>Order from {order.restaurantName} </div>
-                                </div>
-                                <div className="p-col-12 p-md-3">
-                                    {timeFromNow}
-                                </div>
-                                <div className="p-col-12 p-md-2">
-                                    for {order.price}$
+            const renderDeliveryOption = () => {
+                if (order.optionalDeliveryTime === null)
+                    return (
+                        <div>
+                            Deliver now.
                         </div>
-                                <div className="p-col-12 p-md-3">
-                                    <span>
-                                        <Button label="Accept" className="p-button-success p-button-text" onClick={() => { this.acceptAssignment(order.orderId) }} />
-                                        <Button label="Reject" className="p-button-danger p-button-text" onClick={() => { this.rejectAssignment(order.orderId) }} />
-                                    </span>
-                                </div>
+                    );
+                else {
+                    const optionalDeliveryTime = new Date(order.optionalDeliveryTime).toUTCString();
+                    const timeFromNow = moment(optionalDeliveryTime).fromNow();
+
+                    return (
+                        <div>
+                            <div>
+                                Selected Delivery Time is: {optionalDeliveryTime}
+                            </div>
+                            <div>
+                                {timeFromNow}
                             </div>
                         </div>
-                        <div className="p-col-12">
-                            <Steps model={this.statusList} activeIndex={status} />
+                    );
+                }
+            }
+
+            return (
+                <div className="p-col-12" style={{ 'width': '%100', 'marginBottom': '40px', 'border': 'solid' }}>
+                    <div className="p-col-12">
+                        <div className="p-grid">
+                            <div className="p-col-12 p-md-4">
+                                <div>Order from {order.restaurantName} </div>
+                            </div>
+                            <div className="p-col-12 p-md-3">
+                                {timeFromNow}
+                            </div>
+                            <div className="p-col-12 p-md-2">
+                                for {order.price}$
+                        </div>
+                            <div className="p-col-12 p-md-3">
+                                <span>
+                                    <Button label="Accept" className="p-button-success p-button-text" onClick={() => { this.acceptAssignment(order.orderId) }} />
+                                    <Button label="Reject" className="p-button-danger p-button-text" onClick={() => { this.rejectAssignment(order.orderId) }} />
+                                </span>
+                            </div>
                         </div>
                     </div>
+                    <div className="p-col-12">
+                        <Fieldset legend="Customer Information">
+                            <div className="p-grid">
+                                <div className="p-col-12 p-md-4">
+                                    <img src={customerInfo.customerImage} alt="" style={{ 'width': '200px' }}
+                                        onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
+                                    <div><b>Name:</b> {customerInfo.customerName} {customerInfo.customerSurname} </div>
+                                </div>
+                                <div className="p-col-12 p-md-3">
+                                    <div><b>Region:</b> {customerInfo.customerRegionName}</div>
+                                    <div><b>Address:</b> {customerInfo.customerAddress} </div>
+                                </div>
+                                <div className="p-col-12 p-md-2">
+                                    <div><b>Contact Information</b></div>
+                                    <div><b>Customer Telephone:</b> {customerInfo.customerTelephone} </div>
+                                </div>
+                                <div className="p-col-12 p-md-3">
+                                    <div><b>Payment Method:</b> {order.paymentMethod}</div>
+                                    <div><b>Delivery Time Option:</b> {renderDeliveryOption()} </div>
+                                </div>
+                            </div>
+                        </Fieldset>
+                    </div>
+                    <div className="p-col-12">
+                        <Steps model={this.statusList} activeIndex={status} />
+                    </div>
+                </div>
             );
         };
 
@@ -150,6 +195,7 @@ class AssignmentPage extends React.Component {
 
     renderAcceptedOrder() {
         const order = this.state.acceptedOrder.order;
+        const customerInfo = this.state.acceptedOrder;
         const orderTime = new Date(order.orderTime).toUTCString();
         const timeFromNow = moment(orderTime).fromNow();
 
@@ -157,6 +203,30 @@ class AssignmentPage extends React.Component {
         for (var i = 0; i < this.statusList.length; i++) {
             if (this.statusList[i].label === order.status)
                 status = i;
+        }
+
+        const renderDeliveryOption = () => {
+            if (order.optionalDeliveryTime === null)
+                return (
+                    <div>
+                        Deliver now.
+                    </div>
+                );
+            else {
+                const optionalDeliveryTime = new Date(order.optionalDeliveryTime).toUTCString();
+                const timeFromNow = moment(optionalDeliveryTime).fromNow();
+
+                return (
+                    <div>
+                        <div>
+                            Selected Delivery Time is: {optionalDeliveryTime}
+                        </div>
+                        <div>
+                            {timeFromNow}
+                        </div>
+                    </div>
+                );
+            }
         }
 
         return (
@@ -179,6 +249,29 @@ class AssignmentPage extends React.Component {
                                 </span>
                             </div>
                         </div>
+                    </div>
+                    <div className="p-col-12">
+                        <Fieldset legend="Customer Information">
+                            <div className="p-grid">
+                                <div className="p-col-12 p-md-4">
+                                    <img src={customerInfo.customerImage} alt="" style={{ 'width': '200px' }}
+                                        onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
+                                    <div><b>Name:</b> {customerInfo.customerName} {customerInfo.customerSurname} </div>
+                                </div>
+                                <div className="p-col-12 p-md-3">
+                                    <div><b>Region:</b> {customerInfo.customerRegionName}</div>
+                                    <div><b>Address:</b> {customerInfo.customerAddress} </div>
+                                </div>
+                                <div className="p-col-12 p-md-2">
+                                    <div><b>Contact Information</b></div>
+                                    <div><b>Customer Telephone:</b> {customerInfo.customerTelephone} </div>
+                                </div>
+                                <div className="p-col-12 p-md-3">
+                                    <div><b>Payment Method:</b> {order.paymentMethod}</div>
+                                    <div><b>Delivery Time Option:</b> {renderDeliveryOption()} </div>
+                                </div>
+                            </div>
+                        </Fieldset>
                     </div>
                     <div className="p-col-12">
                         <Steps model={this.statusList} activeIndex={status} />

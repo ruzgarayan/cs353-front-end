@@ -12,6 +12,7 @@ import { Button } from 'primereact/button';
 import { Steps } from 'primereact/steps';
 import { Rating } from 'primereact/rating';
 import { DataView } from 'primereact/dataview';
+import { Fieldset } from 'primereact/fieldset';
 import moment from 'moment';
 
 class CourierFinalizedOrders extends React.Component {
@@ -53,38 +54,104 @@ class CourierFinalizedOrders extends React.Component {
 
         console.log(this.state.orders);
         const itemTemplate = (data) => {
-            const orderTime = new Date(data.orderTime).toUTCString();
+            const order = data.order;
+            const customerInfo = data;
+            const orderTime = new Date(order.orderTime).toUTCString();
             const timeFromNow = moment(orderTime).fromNow();
 
             let status = 0;
-            for (var i = 0; i < numStatus; i++) {
-                if (statusList[i].label === data.status)
+            for (var i = 0; i < statusList.length; i++) {
+                if (statusList[i].label === order.status)
                     status = i;
             }
-            return (
-                <div className="p-col-12">
-                    <div className="p-col-12">
-                        <div className="p-grid">
-                            <div className="p-col-12 p-md-4">
-                                <div>Order from {data.restaurantName} </div>
+
+            const renderDeliveryOption = () => {
+                if (order.optionalDeliveryTime === null)
+                    return (
+                        <div>
+                            Deliver now.
+                        </div>
+                    );
+                else {
+                    const optionalDeliveryTime = new Date(order.optionalDeliveryTime).toUTCString();
+                    const timeFromNow = moment(optionalDeliveryTime).fromNow();
+
+                    return (
+                        <div>
+                            <div>
+                                Selected Delivery Time is: {optionalDeliveryTime}
                             </div>
-                            <div className="p-col-12 p-md-3">
+                            <div>
                                 {timeFromNow}
                             </div>
-                            <div className="p-col-12 p-md-2">
-                                for {data.price}$
                         </div>
-                            <div className="p-col-12 p-md-3">
-                                <span>
-                                    <Rating value={3} readOnly cancel={false} />
-                                </span>
+                    );
+                }
+            }
+
+            const renderRating = () => {
+                if (customerInfo.courierScore === -1)
+                    return (
+                        <div>
+                            The customer hasn't reviewed you yet.
+                        </div>
+                    )
+                else {
+                    return (
+                        <div>
+                            <Rating value={customerInfo.courierScore} readOnly cancel={false}></Rating>
+                        </div>
+                    )
+                }
+            }
+
+            return (
+                    <div className="p-col-12" style={{'marginBottom': '30px', 'border': 'solid'}}>
+                        <div className="p-col-12">
+                            <div className="p-grid">
+                                <div className="p-col-12 p-md-4">
+                                    <div>Order from {order.restaurantName} </div>
+                                </div>
+                                <div className="p-col-12 p-md-3">
+                                    {timeFromNow}
+                                </div>
+                                <div className="p-col-12 p-md-2">
+                                    for {order.price}$
+                        </div>
+                                <div className="p-col-12 p-md-3">
+                                    <span>
+                                        {renderRating()}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        <div className="p-col-12">
+                            <Fieldset legend="Customer Information">
+                                <div className="p-grid">
+                                    <div className="p-col-12 p-md-4">
+                                        <img src={customerInfo.customerImage} alt="" style={{ 'width': '200px' }}
+                                            onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
+                                        <div><b>Name:</b> {customerInfo.customerName} {customerInfo.customerSurname} </div>
+                                    </div>
+                                    <div className="p-col-12 p-md-3">
+                                        <div><b>Region:</b> {customerInfo.customerRegionName}</div>
+                                        <div><b>Address:</b> {customerInfo.customerAddress} </div>
+                                    </div>
+                                    <div className="p-col-12 p-md-2">
+                                        <div><b>Contact Information</b></div>
+                                        <div><b>Customer Telephone:</b> {customerInfo.customerTelephone} </div>
+                                    </div>
+                                    <div className="p-col-12 p-md-3">
+                                        <div><b>Payment Method:</b> {order.paymentMethod}</div>
+                                        <div><b>Delivery Time Option:</b> {renderDeliveryOption()} </div>
+                                    </div>
+                                </div>
+                            </Fieldset>
+                        </div>
+                        <div className="p-col-12">
+                            <Steps model={statusList} activeIndex={status} />
+                        </div>
                     </div>
-                    <div className="p-col-12">
-                        <Steps model={statusList} activeIndex={status} />
-                    </div>
-                </div>
             );
         }
 

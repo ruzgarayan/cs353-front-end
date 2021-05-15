@@ -49,6 +49,20 @@ class CustomerOrderList extends React.Component {
         this.setState({chosenOrder: chosenOrder, displayReview: true});
     }
 
+    approveDelivery(chosenOrder) {
+        axios.post("customer/approveOrder/order_id=" + chosenOrder.orderId).then((result) => {
+            if (result.data.success)
+            {
+                toast.success(result.data.message);
+            } else {
+                toast.error(result.data.message);
+            }
+            this.fetchData();
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+        });
+    }
+
     render() {
         const statusList = [
             { label: 'Order Taken' },
@@ -94,6 +108,32 @@ class CustomerOrderList extends React.Component {
                     </div>
                 );
             }
+            else if (status === numStatus - 2) {
+                return (
+                    <div className="p-col-12">
+                        <div className="p-grid">
+                            <div className="p-col-12 p-md-4">
+                                <div>Order from {data.restaurantName} </div>
+                            </div>
+                            <div className="p-col-12 p-md-3">
+                                {timeFromNow}
+                            </div>
+                            <div className="p-col-12 p-md-2">
+                                for {data.price}$
+                        </div>
+                            <div className="p-col-12 p-md-3">
+                                <span>
+                                    <Button label="Order Details" className="p-button-text" onClick={() => {this.showDetails(data);}}/> 
+                                    <Button label="Approve Delivery" className="p-button-raised p-button-success p-button-text" onClick={() => {this.approveDelivery(data);}}/>
+                                </span>
+                            </div>
+                        </div>
+                        <div className="p-col-12">
+                            <Steps model={statusList} activeIndex={status} />
+                        </div>
+                    </div>
+                );
+            }
             else {
                 return (
                     <div className="p-col-12">
@@ -111,7 +151,6 @@ class CustomerOrderList extends React.Component {
                                 <div className="p-col-12 p-md-3">
                                     <span>
                                         <Button label="Order Details" className="p-button-text" onClick={() => {this.showDetails(data);}}/> 
-                                        <Button label="Review" className="p-button-raised p-button-error p-button-text" onClick={() => {this.showReview(data);}} disabled={false} />
                                     </span>
                                 </div>
                             </div>

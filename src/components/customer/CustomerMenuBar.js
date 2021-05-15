@@ -28,7 +28,7 @@ class CustomerMenuBar extends React.Component {
                 command: () => { this.props.history.push('/customer/profile'); }
             },
             {
-                label: 'Old orders',
+                label: 'Orders',
                 icon: 'pi pi-fw pi-list',
                 command: () => { this.props.history.push('/customer/orders'); }
             },

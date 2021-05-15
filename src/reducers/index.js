@@ -87,7 +87,6 @@ export const cartInfo = (state = INITIAL_CART_INFO, action) => {
             newCartItems = [];
             for (var i = 0; i < oldCartItems.length; i++) {
                 if (oldCartItems[i].menuItemId !== action.removedMenuItemId) {
-                    newPrice = newPrice + oldCartItems[i].price;
                     newCartItems = [...newCartItems, oldCartItems[i]];
                 }
                 else {

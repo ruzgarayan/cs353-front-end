@@ -98,6 +98,18 @@ class FinalizeOrderPage extends React.Component {
             return;
         }
 
+        if (this.state.paymentMethod === null)
+        {
+            toast.error("Select a payment method first.");
+            return;
+        }
+
+        if (!this.state.deliverNow && (this.state.optionalDeliveryTime === null))
+        {
+            toast.error("Select the optional delivery time.");
+            return;
+        }
+
         const restaurantId = cartInfo.cartItems[0].menuItemData.restaurantId;
         const customerId = loginInfo.userId;
         const price = cartInfo.totalPrice;
@@ -142,6 +154,13 @@ class FinalizeOrderPage extends React.Component {
 
                 store.dispatch(emptyCartAction());
                 toast.success(result.data.message);
+                const raffleResults = result.data.data;
+                if (raffleResults !== null)
+                {
+                    const message = "You have gained " + raffleResults.newEntries + " entries to raffle. You have now a total of " + raffleResults.totalEntries + " entries.";
+                    toast.success(message);
+                }
+                this.props.history.replace('/customer/orders');
             } else {
                 toast.error(result.data.message);
             }
@@ -201,6 +220,8 @@ class FinalizeOrderPage extends React.Component {
         const itemList = this.renderItemList();
         const totalPrice = this.props.cartInfo.totalPrice;
         const minDate = new Date();
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 7);
         const couponInfo = this.props.cartInfo.usedCoupon;
 
         const paymentMethods = [
@@ -252,7 +273,7 @@ class FinalizeOrderPage extends React.Component {
                             <div className="p-field p-grid">
                                 <label htmlFor="optionalDeliveryTime" className="p-col-fixed" style={{ width: '100px' }}>Optional Delivery Time</label>
                                 <div className="p-col">
-                                    <Calendar disabled={this.state.deliverNow} id="time24" minDate={minDate}
+                                    <Calendar disabled={this.state.deliverNow} id="time24" minDate={minDate} maxDate={maxDate}
                                         value={this.state.optionalDeliveryTime} onChange={(e) => this.setState({ optionalDeliveryTime: e.value })} showTime />
                                 </div>
                             </div>

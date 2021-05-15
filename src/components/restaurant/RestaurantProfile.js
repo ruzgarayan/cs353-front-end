@@ -16,9 +16,14 @@ import FileUploader from "react-firebase-file-uploader";
 import { PickList } from 'primereact/picklist';
 
 import React from 'react';
+import { Fieldset } from 'primereact/fieldset';
+import { Calendar } from 'primereact/calendar';
+import { InputNumber } from 'primereact/inputnumber';
+import moment from 'moment';
 
 
 class RestaurantProfile extends React.Component {
+
     state = {
         loading: true,
 
@@ -45,6 +50,11 @@ class RestaurantProfile extends React.Component {
         imageLoading: false,
         servedRegions: [],
         otherRegions: [],
+        raffleData: null,
+
+        endingTime: new Date(),
+        entryFee: 10,
+        prize: 50,
     };
 
     async fetchData() {
@@ -65,6 +75,17 @@ class RestaurantProfile extends React.Component {
         }).catch((error) => {
             toast.error("Error while getting the region data.");
             success = false;
+        });
+
+        await axios.get("/raffle/getUnfinishedRaffle/restaurant_id=" + restaurantId).then((result) => {
+            if (!result.data.success) {
+                toast.error(result.data.message);
+            }
+            else {
+                this.setState({ raffleData: result.data.data });
+            }
+        }).catch((error) => {
+            toast.error("Error while getting the raffle data.");
         });
 
         //Get all restaurant info
@@ -145,8 +166,7 @@ class RestaurantProfile extends React.Component {
             if (!flag) {
                 console.log("restaurant/removeRegion/restaurant_id=" + restaurantId + "/region_id=" + oldServedRegions[i].regionId);
                 await axios.post("restaurant/removeRegion/restaurant_id=" + restaurantId + "/region_id=" + oldServedRegions[i].regionId).then((result) => {
-                    if (result.data.success)
-                    {
+                    if (result.data.success) {
                         toast.success("Successfully removed " + oldServedRegions[i].regionName + " from the served regions.");
                     } else {
                         toast.error(result.data.message);
@@ -168,8 +188,7 @@ class RestaurantProfile extends React.Component {
 
             if (!flag) {
                 await axios.post("restaurant/addRegion/restaurant_id=" + restaurantId + "/region_id=" + newServedRegions[i].regionId).then((result) => {
-                    if (result.data.success)
-                    {
+                    if (result.data.success) {
                         toast.success("Successfully added " + newServedRegions[i].regionName + " to the served regions.");
                     } else {
                         toast.error(result.data.message);
@@ -222,6 +241,134 @@ class RestaurantProfile extends React.Component {
         });
     }
 
+    renderRaffleTab() {
+        const raffleData = this.state.raffleData;
+        const restaurantId = this.props.loginInfo.restaurantId;
+        const minDate = new Date();
+        const maxDate = new Date();
+        maxDate.setDate(maxDate.getDate() + 30);
+        if (raffleData === null) {
+            return (
+
+                <Fieldset legend="New Raffle" style={{ 'marginTop': '50px' }}>
+                    <div className="p-fluid p-formgrid p-grid">
+                        <h2>Start a new Raffle</h2>
+                        <div className="p-field p-col-12 " >
+                            <div className="p-float-label" style={{ 'marginTop': '30px' }}>
+
+                                <Calendar value={this.state.endingTime} minDate={minDate} maxDate={maxDate} showTime onChange={(e) => this.setState({ endingTime: e.value })} />
+                                <label>Ending Time</label>
+                            </div>
+
+                            <div className="p-float-label" style={{ 'marginTop': '30px' }}>
+
+                                <InputNumber mode="decimal" value={this.state.entryFee} min={1} max={100} mode="currency" currency="USD" locale="en-US"
+                                    onValueChange={(e) => { this.setState({ entryFee: e.value }) }} />
+                                <label>Minimum Entry Fee</label>
+                            </div>
+
+                            <div className="p-float-label" style={{ 'marginTop': '30px' }}>
+
+                                <InputNumber mode="decimal" value={this.state.prize} min={1} max={100} mode="currency" currency="USD" locale="en-US"
+                                    onValueChange={(e) => { this.setState({ prize: e.value }) }} />
+                                <label>Prize</label>
+                            </div>
+
+                            <Button label="Start" style={{ 'marginTop': '30px' }} onClick={
+                                () => {
+                                    const now = new Date();
+                                    const newRaffle = {
+                                        restaurantId: restaurantId,
+                                        startingDate: now,
+                                        endingDate: this.state.endingTime,
+                                        minEntryPrice: this.state.entryFee,
+                                        couponPrize: this.state.prize,
+                                    }
+
+                                    axios.post("/raffle/newRaffle/restaurant_id=" + restaurantId, newRaffle).then((result) => {
+                                        if (!result.data.success) {
+                                            toast.error(result.data.message);
+                                        }
+                                        else {
+                                            toast.success(result.data.message);
+                                            this.fetchData();
+                                        }
+                                    }).catch((error) => {
+                                        toast.error("Error while submitting the new raffle data.");
+                                    });
+                                }
+                            } />
+                        </div>
+                    </div>
+                </Fieldset>
+            );
+        } else {
+            const now = new Date();
+            const endingTime = new Date(raffleData.endingDate);
+            const endingTimeFromNow = moment(raffleData.endingDate).fromNow();
+            const startingTimeFromNow = moment(raffleData.startingDate).fromNow();
+
+            const finished = now.getTime() > endingTime.getTime();
+            const renderButton = () => {
+                if (finished)
+                    return (
+                        <div>
+                            <Button label="Poll the Winner" onClick={() => {
+                                axios.post("/raffle/finishRaffle/restaurant_id=" + restaurantId + "/raffle_id=" + raffleData.raffleId).then((result) => {
+                                    if (!result.data.success) {
+                                        toast.error(result.data.message);
+                                    }
+                                    else {
+                                        toast.success(result.data.message);
+                                        const message = "Winner of the raffle is the customer " + result.data.data + ".";
+                                        toast.success(message);
+                                        this.fetchData();
+                                    }
+                                }).catch((error) => {
+                                    toast.error("Error while submitting the new raffle data.");
+                                });
+                            }} />
+                        </div>
+                    );
+                else {
+                    return (
+                        <div>
+                            You can poll the winner when the raffle ends.
+                        </div>
+                    );
+                }
+            }
+
+            return (
+
+                <Fieldset legend="Current Raffle" style={{ 'marginTop': '50px' }}>
+                    <div className="p-fluid p-formgrid p-grid">
+                        <div className="p-field p-col-12 " >
+                            <div className="p-float-label" style={{ 'marginTop': '10px' }}>
+                            </div>
+                            <b>Starting time</b> is {startingTimeFromNow}
+                            <div className="p-float-label" style={{ 'marginTop': '10px' }}>
+                                <b>Ending time</b> is {endingTimeFromNow}
+                            </div>
+
+                            <div className="p-float-label" style={{ 'marginTop': '10px' }}>
+                                <b>Minimum Entry Fee</b> is {raffleData.minEntryPrice}$
+                            </div>
+
+                            <div className="p-float-label" style={{ 'marginTop': '10px' }}>
+                                <b>Prize</b> is {raffleData.couponPrize}$
+                            </div>
+
+                            <div className="p-float-label" style={{ 'marginTop': '10px' }}>
+                                {renderButton()}
+                            </div>
+                        </div>
+                    </div>
+                </Fieldset>
+            );
+        }
+    }
+
     render() {
         if (this.state.loading) {
             return (
@@ -263,9 +410,9 @@ class RestaurantProfile extends React.Component {
                                 sourceHeader="Others" targetHeader="Served Regions"
                                 sourceStyle={{ height: '342px' }} targetStyle={{ height: '342px' }}
                                 onChange={this.onChange}
-                                showSourceControls={false}  
+                                showSourceControls={false}
                                 showTargetControls={false}
-                                >
+                            >
                             </PickList>
                         </div>
 
@@ -338,6 +485,9 @@ class RestaurantProfile extends React.Component {
 
                         {
                             renderUploadProgress()
+                        }
+                        {
+                            this.renderRaffleTab()
                         }
                     </div>
                 </div>
