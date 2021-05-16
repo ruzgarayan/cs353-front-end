@@ -176,7 +176,7 @@ class RestaurantList extends React.Component {
             }
             return (
                 <div className="restaurant-item">
-                    <img src={data.image} alt="" 
+                    <img src={data.image} alt="" style={{'height':'100%'}}
                     onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
                     <div className="restaurant-detail">
                         <div className="restaurant-name">{data.restaurantName}</div>

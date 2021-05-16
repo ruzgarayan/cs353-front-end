@@ -9,6 +9,7 @@ import {DataView} from "primereact/dataview";
 import {withRouter} from "react-router";
 import {connect} from "react-redux";
 import OrderDetailsDialog from "../customer/OrderDetailsDialog";
+import { Rating } from 'primereact/rating';
 
 class MainRestaurantPage extends React.Component
 {
@@ -16,7 +17,9 @@ class MainRestaurantPage extends React.Component
         loading: true,
         displayDetails: false,
         displayReview: false,
-        orders: []
+        orders: [],
+        status: true,
+        rating: 0
     };
 
     async fetchData(){
@@ -24,13 +27,23 @@ class MainRestaurantPage extends React.Component
         let restaurantId = this.props.loginInfo.restaurantId;
         this.setState({ loading: true });
 
-        axios.get("restaurant/activeOrders/restaurant_id=" + restaurantId).then((result =>{
+        await axios.get("restaurant/activeOrders/restaurant_id=" + restaurantId).then((result =>{
             console.log(result.data);
-            this.setState({orders: result.data.data, loading: false})
+            this.setState({orders: result.data.data})
         })).catch((error)=>{
             toast.error("Error while getting the order data.");
             success = false;
         });
+
+        await axios.get("restaurant/restaurantData/restaurant_id=" + restaurantId).then((result =>{
+            console.log(result.data);
+            this.setState({status: result.data.data.status, rating: result.data.data.rating});
+        })).catch((error)=>{
+            toast.error("Error while getting the status data.");
+            success = false;
+        });
+
+        this.setState({loading: false});
 
     }
 
@@ -62,6 +75,36 @@ class MainRestaurantPage extends React.Component
         }
     }
 
+    open() {
+        let restaurantId = this.props.loginInfo.restaurantId;
+        axios.post("restaurant/open/restaurant_id=" + restaurantId).then((result)=>{
+            if(result.data.success)
+            {
+                toast.success(result.data.message);
+                this.setState({status: true});
+            } else {
+                toast.error(result.data.message);
+            }
+        }).catch((error)=>{
+           toast.error("Error while updating the status.")
+        });
+    }
+
+    close() {
+        let restaurantId = this.props.loginInfo.restaurantId;
+        axios.post("restaurant/close/restaurant_id=" + restaurantId).then((result)=>{
+            if(result.data.success)
+            {
+                toast.success(result.data.message);
+                this.setState({status: false});
+            } else {
+                toast.error(result.data.message);
+            }
+        }).catch((error)=>{
+           toast.error("Error while updating the status.")
+        });
+    }
+
     render() {
         const statusList = [
             { label: 'Order Taken' },
@@ -73,7 +116,6 @@ class MainRestaurantPage extends React.Component
         ];
         const numStatus = statusList.length;
 
-        console.log(this.state.orders);
         const itemTemplate = (data) => {
             const orderTime = new Date(data.orderTime).toUTCString();
             const timeFromNow = moment(orderTime).fromNow();
@@ -146,9 +188,26 @@ class MainRestaurantPage extends React.Component
             );
         }
         else {
+
+            const openCloseButton = () => {
+                if (!this.state.status)
+                {
+                    return (<div><Button label="Open the Restaurant For Orders" style={{'marginTop': '50px'}} onClick={()=>{this.open()}}/></div>);
+                } else {
+                    return (<div><Button label="Close the Restaurant For Orders" style={{'marginTop': '50px'}} onClick={()=>{this.close()}}/></div>);
+                }
+            }
+
             return (
-                <div>
-                    <div className="card">
+                <div className="p-fluid p-formgrid p-grid">
+                    <div className="p-field p-col-12 p-md-3" >
+                        {openCloseButton()}
+                        <Rating value={this.state.rating} readOnly cancel={false} style={{'marginTop': '20px'}}></Rating>
+                        <div style={{'marginTop': '20px'}}>
+                            <h3>Your restaurant rating is: {this.state.rating}</h3>
+                        </div>
+                    </div>
+                    <div className="p-field p-col-12 p-md-9" >
                         <DataView value={this.state.orders} itemTemplate={itemTemplate} layout="list" header="List of Active Orders" paginator rows={5}/>
                     </div>
                     <OrderDetailsDialog chosenOrder={this.state.chosenOrder} visible={this.state.displayDetails} hideDialog={() => this.setState({displayDetails: false})} />
