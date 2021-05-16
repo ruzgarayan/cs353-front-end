@@ -33,6 +33,7 @@ import AssignmentPage from './components/courier/AssignmentsPage';
 import CourierFinalizedOrders from './components/courier/CourierFinalizedOrders';
 import RestaurantModifyMenu from './components/restaurant/RestaurantModifyMenu';
 import AdminPage from './components/admin/AdminPage';
+import RestaurantFinalizedOrders from "./components/restaurant/RestaurantFinalizedOrders";
 
 
 class App extends React.Component {
@@ -66,6 +67,8 @@ class App extends React.Component {
                                     <Route path="/courier/finalizedOrders" exact component={CourierFinalizedOrders} />
                                     <Route path="/restaurant" component={RestaurantMenuBar} />
                                     <Route path="/restaurant/profile" exact component={RestaurantProfile} />
+                                    <Route path="/restaurant/activeOrders" exact component={MainRestaurantPage}/>
+                                    <Route path="/restaurant/finalizedOrders" exact component={RestaurantFinalizedOrders}/>
                                     <Route path="/restaurant/modifyMenu" exact component={RestaurantModifyMenu} />
                                     <Route path="/admin/" exact component={AdminPage} />
                                 

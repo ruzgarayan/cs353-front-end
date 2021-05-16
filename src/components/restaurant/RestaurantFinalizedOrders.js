@@ -6,9 +6,10 @@ import {Button} from "primereact/button";
 import {Steps} from "primereact/steps";
 import {ProgressSpinner} from "primereact/progressspinner";
 import {DataView} from "primereact/dataview";
+import OrderDetailsDialog from "../customer/OrderDetailsDialog";
+import RestaurantCommentDialog from "./RestaurantCommentDialog";
 import {withRouter} from "react-router";
 import {connect} from "react-redux";
-import OrderDetailsDialog from "../customer/OrderDetailsDialog";
 
 class MainRestaurantPage extends React.Component
 {
@@ -24,7 +25,7 @@ class MainRestaurantPage extends React.Component
         let restaurantId = this.props.loginInfo.restaurantId;
         this.setState({ loading: true });
 
-        axios.get("restaurant/activeOrders/restaurant_id=" + restaurantId).then((result =>{
+        axios.get("restaurant/finalizedOrders/restaurant_id=" + restaurantId).then((result =>{
             console.log(result.data);
             this.setState({orders: result.data.data, loading: false})
         })).catch((error)=>{
@@ -42,24 +43,8 @@ class MainRestaurantPage extends React.Component
         console.log(chosenOrder);
         this.setState({chosenOrder: chosenOrder, displayDetails: true});
     }
-
-    updateOrder(chosenOrder, status){
-        console.log("Hello");
-        console.log(chosenOrder);
-        console.log(status);
-        if(status === 0){
-            axios.post("restaurant/statusUpdate/preparing/order_id=" + chosenOrder.orderId).then((result)=>{
-                this.fetchData();
-            }).catch((error)=>{
-               toast.error("Error while updating the order status.")
-            });
-        }else{
-            axios.post("restaurant/statusUpdate/finalize/order_id=" + chosenOrder.orderId).then((result)=>{
-                this.fetchData();
-            }).catch((error)=>{
-                toast.error("Error while updating the order status.")
-            });
-        }
+    showReview(chosenOrder) {
+        this.setState({chosenOrder: chosenOrder, displayReview: true});
     }
 
     render() {
@@ -84,7 +69,7 @@ class MainRestaurantPage extends React.Component
                     status = i;
             }
 
-            if (status >= 1) {
+            if (status >= numStatus - 1) {
                 return (
                     <div className="p-col-12">
                         <div className="p-grid">
@@ -100,11 +85,8 @@ class MainRestaurantPage extends React.Component
                             <div className="p-col-12 p-md-3">
                                 <span>
                                     <Button label="Order Details" className="p-button-text" onClick={() => {this.showDetails(data);}}/>
-                                    <Button label="Finalize Order" className="p-button-raised p-button-success p-button-text" onClick={() => {this.updateOrder(data, status);this.forceUpdate();}}/>
+                                    <Button label="Customer Review" className="p-button-raised p-button-success p-button-text" onClick={() => {this.showReview(data);}}/>
                                 </span>
-                            </div>
-                            <div className="p-col-12">
-                                <Steps model={statusList} activeIndex={status} />
                             </div>
                         </div>
                     </div>
@@ -127,7 +109,6 @@ class MainRestaurantPage extends React.Component
                                 <div className="p-col-12 p-md-3">
                                     <span>
                                         <Button label="Order Details" className="p-button-text" onClick={() => {this.showDetails(data);}}/>
-                                        <Button label="Update Order" className="p-button-raised p-button-error p-button-text" onClick={() => {this.updateOrder(data, status);this.forceUpdate();}} disabled={false} />
                                     </span>
                                 </div>
                             </div>
@@ -152,6 +133,7 @@ class MainRestaurantPage extends React.Component
                         <DataView value={this.state.orders} itemTemplate={itemTemplate} layout="list" header="List of Active Orders" paginator rows={5}/>
                     </div>
                     <OrderDetailsDialog chosenOrder={this.state.chosenOrder} visible={this.state.displayDetails} hideDialog={() => this.setState({displayDetails: false})} />
+                    <RestaurantCommentDialog chosenOrder={this.state.chosenOrder} visible={this.state.displayReview} hideDialog={()=> this.setState({displayReview: false})}/>
                 </div>
             );
         }
