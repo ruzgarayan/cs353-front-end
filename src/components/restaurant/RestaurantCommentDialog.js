@@ -29,26 +29,61 @@ class RestaurantCommentDialog extends React.Component {
             reviewData: null,
             loading: true,
             fetching: false,
-            restaurantScore: 0,
-            courierScore: 0,
-            comment: "",
-            makeComment: false
+            response: null
         };
     }
 
     async fetchReviewData() {
-        this.setState({loading: true, fetching: true});
+        this.setState({ loading: true, fetching: true , response: null});
 
         await axios.get("/review/getReview/order_id=" + this.props.chosenOrder.orderId).then((result) => {
             if (!result.data.success) {
                 toast.error(result.data.message);
             } else
-                this.setState({reviewData: result.data.data});
+                this.setState({ reviewData: result.data.data });
         }).catch((error) => {
             toast.error("Error while getting the review data.");
         });
 
-        this.setState({loading: false, fetching: false});
+        this.setState({ loading: false, fetching: false });
+    }
+
+    componentDidUpdate(prevProps) {
+        if (!prevProps.visible && this.props.visible) {
+            this.fetchReviewData();
+        }
+    }
+    
+    changeResponse(response) {
+        if (response.length > 128) {
+            toast.error("Review response cannot exceed 128 characters");
+        }
+        else {
+            this.setState({ response: response });
+        }
+    }
+
+    makeResponse() {
+        if (this.state.response === null ||this.state.response.length < 20)
+        {
+            toast.warning("Your comment must be at least 20 characters long.");
+            return;
+        }
+
+        const response = {
+            response: this.state.response
+        }
+
+        axios.post("/review/makeResponse/review_id=" + this.state.reviewData.reviewId, response).then((result) => {
+            if (!result.data.success) {
+                toast.error(result.data.message);
+            } else {
+                toast.success(result.data.message);
+                this.props.hideDialog();
+            }
+        }).catch((error) => {
+            toast.error("Error while getting the review data.");
+        });
     }
 
     render() {
@@ -68,41 +103,17 @@ class RestaurantCommentDialog extends React.Component {
             );
         }
         else if (reviewData === null) {
-
-            const renderCommentInput = () => {
-                if (this.state.makeComment) {
-                    return (
-                        <InputTextarea value={this.state.comment} onChange={(e) => { this.changeComment(e.target.value) }} rows={5} cols={30} />
-                    );
-                }
-                else {
-                    return (
-                        <div></div>
-                    );
-                }
-            }
-
             return (
                 <div>
                     <Dialog
-                        header="Customer Review"
+                        header="No Review"
                         visible={visible}
                         style={{ width: '50vw', height: '100' }}
                         modal={true}
                         onHide={() => this.props.hideDialog()}
                     >
                         <div className="card">
-                            <b>Restaurant Score:</b>
-                            <Rating value={this.state.restaurantScore} cancel={false} onChange={(e) => this.setState({ restaurantScore: e.value })} ></Rating>
-                            <b>Courier Score:</b>
-                            <Rating value={this.state.courierScore} cancel={false} onChange={(e) => this.setState({ courierScore: e.value })} ></Rating>
-                            <div style={{ 'marginTop': '20px', 'marginBottom': '20px', 'fontSize': '25px' }}> Make a comment:
-                                <InputSwitch style={{ 'marginLeft': '20px' }} checked={this.state.makeComment} onChange={(e) => this.setState({ makeComment: e.value })} />
-                            </div>
-
-                            {renderCommentInput()}
-
-                            <div><Button label="Submit Review" onClick={() => { this.submitReview() }} /></div>
+                            The customer {this.props.chosenOrder.customerNameSurname} has not reviewed this order yet.
                         </div>
                     </Dialog>
                 </div>
@@ -110,17 +121,29 @@ class RestaurantCommentDialog extends React.Component {
         } else {
 
             const data = this.state.reviewData;
-            const orderTime = new Date(data.date).toUTCString();
-            const timeFromNow = moment(orderTime).fromNow();
+            const reviewTime = new Date(data.date).toUTCString();
+            const timeFromNow = moment(reviewTime).fromNow();
 
             const renderResponsePart = () => {
                 if (data.response === null || data.response === "")
-                    return <div></div>;
+                    return (
+                        <div className="p-col-12" style={{'textAlign': 'center'}}>
+                            <Divider align="center" >
+                                <b>Write a response:</b>
+                            </Divider>
+                            <div className="p-col-12" style={{'textAlign': 'center'}}>
+                                <InputTextarea value={this.state.response} onChange={(e) => { this.changeResponse(e.target.value) }} rows={5} cols={30} />
+                            </div>
+                            <div className="p-col-12" style={{'textAlign': 'center'}}> 
+                                <Button label="Publish Response" onClick={()=>{this.makeResponse()}}/>
+                            </div>
+                        </div>
+                    );
                 else
                     return (
                         <div>
                             <Divider align="center" >
-                                <b>Response from Restaurant Owner:</b>
+                                <b>Your response:</b>
                             </Divider>
                             <div className="p-col-12">
                                 {data.response}
@@ -136,7 +159,7 @@ class RestaurantCommentDialog extends React.Component {
             return (
                 <div>
                     <Dialog
-                        header="Your Review"
+                        header="Review of the Order"
                         visible={visible}
                         style={{ width: '50vw', height: '100' }}
                         modal={true}
@@ -146,7 +169,7 @@ class RestaurantCommentDialog extends React.Component {
                         <div className="p-col-12">
                             <Fieldset legend={legend()}>
 
-                                <div className="p-col-12">
+                                <div className="p-col-12" style={{'textAlign': 'center'}}>
                                     {data.comment}
                                 </div>
                                 {responsePart}

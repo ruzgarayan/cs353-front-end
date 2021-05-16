@@ -9,7 +9,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { DataView } from 'primereact/dataview';
 import { SelectButton } from 'primereact/selectbutton';
 import { toast } from "react-toastify";
-import { Timeline } from 'primereact/timeline';
+import moment from 'moment';
 import { Card } from 'primereact/card';
 
 class OrderDetailsDialog extends React.Component {
@@ -121,20 +121,11 @@ class OrderDetailsDialog extends React.Component {
             const dialogHeader = "Your order from " + orderData.order.restaurantName;
             console.log(orderData);
             const couponText = (orderData.order.coupon === null) ? "" : <div><h2>Used coupon: {orderData.order.coupon}</h2></div>;
+            
+            const deliveryTime = new Date(orderData.order.deliveryTime).toUTCString();
+            const deliveryTimeFromNow = moment(deliveryTime).fromNow();
+            const deliveryTimeText = (orderData.order.deliveryTime === null) ? "" : <div><h2>Delivered at: {deliveryTime}, <br/> {deliveryTimeFromNow}</h2></div>;
 
-            const timelineData = [
-                { status: 'Ordered', date: '15/10/2020 10:30', icon: 'pi pi-check', color: '#00FF00', },
-                { status: 'Processing', date: '15/10/2020 14:00', icon: 'pi pi-check', color: '#00FF00' },
-                { status: 'Shipped', date: '15/10/2020 16:15', icon: 'pi pi-times', color: '#FF0000' },
-                { status: 'Delivered', date: '16/10/2020 10:00', icon: 'pi pi-times', color: '#FF0000' },
-            ];
-            const customizedMarker = (item) => {
-                return (
-                    <span className="custom-marker p-shadow-2" style={{ backgroundColor: item.color }}>
-                        <i className={item.icon}></i>
-                    </span>
-                );
-            };
 
             return (
                 <div>
@@ -159,9 +150,10 @@ class OrderDetailsDialog extends React.Component {
                                     {couponText}
                                     <div><h2>Total price: {orderData.order.price}$</h2></div>
                                     <div><h2>Order status: {orderData.order.status}</h2></div>
+                                    {deliveryTimeText}
                                 </div></div>
                                 <div className="p-col-12 p-md-3">
-                                    <Timeline value={timelineData} marker={customizedMarker} opposite={(item) => item.status} content={(item) => <small className="p-text-secondary">{item.date}</small>} />
+                                    
                                 </div>
                                 </div>
                             </Card>

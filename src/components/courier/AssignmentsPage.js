@@ -61,6 +61,7 @@ class AssignmentPage extends React.Component {
         axios.post("/courier/acceptAssignment/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
             if (result.data.success) {
                 toast.success(result.data.message);
+                this.fetchData();
             } else {
                 toast.error(result.data.message);
             }
@@ -74,6 +75,7 @@ class AssignmentPage extends React.Component {
         axios.post("/courier/rejectAssignment/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
             if (result.data.success) {
                 toast.success(result.data.message);
+                this.fetchData();
             } else {
                 toast.error(result.data.message);
             }
@@ -87,6 +89,7 @@ class AssignmentPage extends React.Component {
         axios.post("/courier/finalizeOrder/courier_id=" + userId + "/order_id=" + order_id).then((result) => {
             if (result.data.success) {
                 toast.success(result.data.message);
+                this.fetchData();
             } else {
                 toast.error(result.data.message);
             }

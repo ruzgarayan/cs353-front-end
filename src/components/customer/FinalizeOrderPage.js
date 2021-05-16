@@ -155,7 +155,7 @@ class FinalizeOrderPage extends React.Component {
                 store.dispatch(emptyCartAction());
                 toast.success(result.data.message);
                 const raffleResults = result.data.data;
-                if (raffleResults !== null)
+                if (raffleResults !== null && raffleResults.newEntries !== -1 && raffleResults.totalEntries !== -1)
                 {
                     const message = "You have gained " + raffleResults.newEntries + " entries to raffle. You have now a total of " + raffleResults.totalEntries + " entries.";
                     toast.success(message);

@@ -50,6 +50,15 @@ class CourierFinalizedOrders extends React.Component {
             { label: 'Delivered-Waiting Your Approval' },
             { label: 'Delivered-Approved' }
         ];
+        
+        const displayStatusList = [
+            { label: 'Order Taken' },
+            { label: 'Preparing Food' },
+            { label: 'Waiting Courier' },
+            { label: 'Delivering' },
+            { label: 'Delivered-Waiting Customer\'s Approval' },
+            { label: 'Delivered-Approved' }
+        ];
         const numStatus = statusList.length;
 
         console.log(this.state.orders);
@@ -149,7 +158,7 @@ class CourierFinalizedOrders extends React.Component {
                             </Fieldset>
                         </div>
                         <div className="p-col-12">
-                            <Steps model={statusList} activeIndex={status} />
+                            <Steps model={displayStatusList} activeIndex={status} />
                         </div>
                     </div>
             );
