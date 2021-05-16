@@ -45,13 +45,13 @@ class CustomerProfile extends React.Component {
 
     //TODO there is a problem when this.setState({ regions: result.data.data }); doesnt work before trying to change selectedRegion.
     //Separate into fetchRegions(), fetchUserData(), ... 
-    fetchData() {
+    async fetchData() {
         let success = true;
         let userId = this.props.loginInfo.userId;
         this.setState({ loading: true });
 
         //Get regions
-        axios.get("/region/allRegions").then((result) => {
+        await axios.get("/region/allRegions").then((result) => {
             if (!result.data.success) {
                 success = false;
             }
@@ -64,7 +64,7 @@ class CustomerProfile extends React.Component {
         });
 
         //Get user info
-        axios.get("/customer/customerData/id=" + userId).then((result) => {
+        await axios.get("/customer/customerData/id=" + userId).then((result) => {
             if (!result.data.success) {
                 success = false;
             }
@@ -74,7 +74,8 @@ class CustomerProfile extends React.Component {
                 console.log(this.state);
                 this.setState({ userInfo: newUserInfo });
                 for (let i = 0; i < this.state.regions.length; i++) {
-                    if (this.state.regions[i].region_id === newUserInfo.region_id) {
+
+                    if (this.state.regions[i].regionId === newUserInfo.region_id) {
                         this.setState({ selectedRegion: this.state.regions[i] });
                         break;
                     }
@@ -87,7 +88,7 @@ class CustomerProfile extends React.Component {
 
 
         //Get coupons
-        axios.get("/raffle/coupons/id=" + userId).then((result) => {
+        await axios.get("/raffle/coupons/id=" + userId).then((result) => {
             console.log(result);
             if (!result.data.success) {
                 success = false;
@@ -101,13 +102,7 @@ class CustomerProfile extends React.Component {
         });
 
 
-        //If success, stop loading screen
-        if (success)
-            this.setState({ loading: false });
-        else {
-            toast.error("An error occured, retrying...");
-            this.fetchData();
-        }
+        this.setState({ loading: false });
     }
 
     componentDidMount() {
@@ -147,6 +142,7 @@ class CustomerProfile extends React.Component {
             );
         }
         else {
+            console.log(this.state);
             const renderUploadProgress = () => {
                 if (this.state.imageLoading)
                     return (<div> Uploading the image, progress {this.state.imageProgress}%</div>)
@@ -205,9 +201,9 @@ class CustomerProfile extends React.Component {
                             <div className="p-field p-col-12 p-md-4" >
 
                                 <ScrollPanel style={{ 'width': '100%', 'height': '150px', 'marginTop': '25px' }}>
-                                    <ListBox optionLabel="region_name" value={this.state.selectedRegion}
+                                    <ListBox optionLabel="regionName" value={this.state.selectedRegion}
                                         options={this.state.regions}
-                                        onChange={(e) => this.setState({ selectedRegion: e.value, userInfo: { ...this.state.userInfo, region_id: e.value.region_id } })} />
+                                        onChange={(e) => this.setState({ selectedRegion: e.value, userInfo: { ...this.state.userInfo, region_id: e.value.regionId } })} />
                                 </ScrollPanel>
                             </div>
                         </div>
