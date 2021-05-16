@@ -77,7 +77,7 @@ class RegisterPage extends React.Component {
             registerInfo = {
                 ...registerInfo, 
                 address: this.state.address,
-                region_id: this.state.selectedRegion.region_id
+                region_id: this.state.selectedRegion.regionId
             }
             url = "/registerCustomer";
         }
@@ -112,7 +112,7 @@ class RegisterPage extends React.Component {
                             <h4> Region </h4>
                             <div>
                                 <ScrollPanel style={{'width': '100%', 'height': '150px', 'marginTop': '25px'}}>
-                                    <ListBox optionLabel="region_name" value={this.state.selectedRegion}
+                                    <ListBox optionLabel="regionName" value={this.state.selectedRegion}
                                     options={this.state.regions} onChange={(e) => this.setState({selectedRegion: e.value})} />
                                 </ScrollPanel>
                             </div>

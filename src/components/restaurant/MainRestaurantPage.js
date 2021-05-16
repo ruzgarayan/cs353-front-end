@@ -128,8 +128,8 @@ class MainRestaurantPage extends React.Component
 
             if (status >= 1) {
                 return (
-                    <div className="p-col-12">
-                        <div className="p-grid">
+                    <div className="p-col-12" style={{'marginTop':'15px'}}>
+                        <div className="p-grid" style={{'marginTop':'15px'}}>
                             <div className="p-col-12 p-md-4">
                                 <div>Order from {data.customerNameSurname} </div>
                             </div>
@@ -154,10 +154,10 @@ class MainRestaurantPage extends React.Component
             }
             else {
                 return (
-                    <div className="p-col-12">
+                    <div className="p-col-12" style={{'marginTop':'15px'}}>
                         <div className="p-col-12">
-                            <div className="p-grid">
-                                <div className="p-col-12 p-md-4">
+                            <div className="p-grid" style={{'marginTop':'15px'}}>
+                                <div className="p-col-12 p-md-4" >
                                     <div>Order from {data.customerNameSurname} </div>
                                 </div>
                                 <div className="p-col-12 p-md-3">

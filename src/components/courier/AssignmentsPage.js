@@ -11,7 +11,7 @@ import { toast } from 'react-toastify';
 import { Button } from 'primereact/button';
 import { Steps } from 'primereact/steps';
 import { DataView } from 'primereact/dataview';
-import { Card } from 'primereact/card';
+import { Rating } from 'primereact/rating';
 import moment from 'moment';
 import { Fieldset } from 'primereact/fieldset';
 
@@ -29,7 +29,9 @@ class AssignmentPage extends React.Component {
     state = {
         assignments: [],
         acceptedOrder: null,
-        loading: true
+        loading: true,
+        rating: 0,
+        status: true,
     }
 
     async fetchData() {
@@ -45,6 +47,13 @@ class AssignmentPage extends React.Component {
         await axios.get("/courier/getAcceptedOrder/courier_id=" + userId).then((result) => {
             console.log(result.data.data);
             this.setState({ acceptedOrder: result.data.data });
+        }).catch((error) => {
+            toast.error("Error during the connection.");
+        });
+
+        await axios.get("/courier/courierData/courier_id=" + userId).then((result) => {
+            console.log(result.data.data);
+            this.setState({ rating: result.data.data.courier.rating, status: result.data.data.courier.status });
         }).catch((error) => {
             toast.error("Error during the connection.");
         });
@@ -196,6 +205,37 @@ class AssignmentPage extends React.Component {
         );
     }
 
+    open() {
+        const userId = this.props.loginInfo.userId;
+        axios.post("courier/open/courier_id=" + userId).then((result)=>{
+            if(result.data.success)
+            {
+                toast.success(result.data.message);
+                this.setState({status: true});
+            } else {
+                toast.error(result.data.message);
+            }
+        }).catch((error)=>{
+           toast.error("Error while updating the status.")
+        });
+    }
+
+    close() {
+        const userId = this.props.loginInfo.userId;
+        axios.post("courier/close/courier_id=" + userId).then((result)=>{
+            if(result.data.success)
+            {
+                toast.success(result.data.message);
+                this.setState({status: false});
+            } else {
+                toast.error(result.data.message);
+            }
+        }).catch((error)=>{
+           toast.error("Error while updating the status.")
+        });
+    }
+
+
     renderAcceptedOrder() {
         const order = this.state.acceptedOrder.order;
         const customerInfo = this.state.acceptedOrder;
@@ -285,18 +325,45 @@ class AssignmentPage extends React.Component {
     }
 
     render() {
+        const openCloseButton = () => {
+            if (!this.state.status)
+            {
+                return (<div><Button label="Start Accepting New Assignments" style={{'marginTop': '50px'}} onClick={()=>{this.open()}}/></div>);
+            } else {
+                return (<div><Button label="Stop Accepting New Assignments" style={{'marginTop': '50px'}} onClick={()=>{this.close()}}/></div>);
+            }
+        }
+
         if (this.state.loading) {
             return (<ProgressSpinner />);
         }
         if (this.state.acceptedOrder === null) {
-            return (<div>
-                { this.renderAssignments()}
+            return (<div className="p-grid">
+                <div className="p-col-12 p-md-3">
+                    {openCloseButton()}
+                    <Rating value={this.state.rating} readOnly cancel={false} style={{ 'marginTop': '20px' }}></Rating>
+                    <div style={{ 'marginTop': '20px' }}>
+                        <h3>Your rating is: {this.state.rating}</h3>
+                    </div>
+                </div>
+                <div className="p-col-12 p-md-9">
+                    {this.renderAssignments()}
+                </div>
             </div>);
         }
         else {
             return (
-                <div>
-                    { this.renderAcceptedOrder()}
+                <div className="p-grid">
+                    <div className="p-col-12 p-md-3">
+                        {openCloseButton()}
+                        <Rating value={this.state.rating} readOnly cancel={false} style={{ 'marginTop': '20px' }}></Rating>
+                        <div style={{ 'marginTop': '20px' }}>
+                            <h3>Your rating is: {this.state.rating}</h3>
+                        </div>
+                    </div>
+                    <div className="p-col-12 p-md-9">
+                        {this.renderAcceptedOrder()}
+                    </div>
                 </div>
             );
         }
