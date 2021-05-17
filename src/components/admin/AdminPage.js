@@ -67,8 +67,11 @@ class AdminPage extends React.Component {
     render() {
         return (
             <div>
-                <Button label="Generate Payment Method Report" onClick={() => this.generateReport("paymentMethod")} /> 
-                <Button label="Generate Raffle Winners Report" onClick={() => this.generateReport("raffleStatistics")}/>
+                <Button label="Generate Payment Method Report" onClick={() => this.generateReport("paymentMethod")} style={{ 'marginTop': '30px' }} /> 
+                <br/>
+                <Button label="Generate Raffle Winners Report" onClick={() => this.generateReport("raffleStatistics")} style={{ 'marginTop': '30px' }} />
+                <br/>
+                <Button label="Generate Raffle Winners Report" onClick={() => this.generateReport("restaurantOrderStatistics")} style={{ 'marginTop': '30px' }} />
 
                 <div style={{ 'marginTop': '100px' }}>
                     {this.renderReportTable()}
