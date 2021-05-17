@@ -367,7 +367,7 @@ class AssignmentPage extends React.Component {
     }
 
     accept2(orderId) {
-        this.reject2(orderId);
+        this.rejectAssignment(orderId);
     }
 
     reject2() {
