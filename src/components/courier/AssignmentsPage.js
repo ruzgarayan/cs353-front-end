@@ -34,6 +34,18 @@ class AssignmentPage extends React.Component {
         status: true,
     }
 
+    constructor(props) {
+        super(props);
+
+        this.accept1 = this.accept1.bind(this);
+        this.reject1 = this.reject1.bind(this);
+        this.confirm1 = this.confirm1.bind(this);
+
+        this.accept2 = this.accept2.bind(this);
+        this.reject2 = this.reject2.bind(this);
+        this.confirm2 = this.confirm2.bind(this);
+    }
+
     async fetchData() {
         this.setState({ loading: true });
         const userId = this.props.loginInfo.userId;
@@ -145,6 +157,14 @@ class AssignmentPage extends React.Component {
                 }
             }
 
+            const confirm1 = () => {
+                this.confirm1(order.orderId);
+            }
+            const confirm2 = () => {
+                this.confirm2(order.orderId);
+            }
+
+
             return (
                 <div className="p-col-12" style={{ 'width': '%100', 'marginBottom': '40px', 'border': 'solid' }}>
                     <div className="p-col-12">
@@ -160,8 +180,8 @@ class AssignmentPage extends React.Component {
                         </div>
                             <div className="p-col-12 p-md-3">
                                 <span>
-                                    <Button label="Accept" className="p-button-success p-button-text" onClick={() => { this.acceptAssignment(order.orderId) }} />
-                                    <Button label="Reject" className="p-button-danger p-button-text" onClick={() => { this.rejectAssignment(order.orderId) }} />
+                                    <Button label="Accept" className="p-button-success p-button-text" onClick={confirm1} />
+                                    <Button label="Reject" className="p-button-danger p-button-text" onClick={confirm2} />
                                 </span>
                             </div>
                         </div>
@@ -207,31 +227,29 @@ class AssignmentPage extends React.Component {
 
     open() {
         const userId = this.props.loginInfo.userId;
-        axios.post("courier/open/courier_id=" + userId).then((result)=>{
-            if(result.data.success)
-            {
+        axios.post("courier/open/courier_id=" + userId).then((result) => {
+            if (result.data.success) {
                 toast.success(result.data.message);
-                this.setState({status: true});
+                this.setState({ status: true });
             } else {
                 toast.error(result.data.message);
             }
-        }).catch((error)=>{
-           toast.error("Error while updating the status.")
+        }).catch((error) => {
+            toast.error("Error while updating the status.")
         });
     }
 
     close() {
         const userId = this.props.loginInfo.userId;
-        axios.post("courier/close/courier_id=" + userId).then((result)=>{
-            if(result.data.success)
-            {
+        axios.post("courier/close/courier_id=" + userId).then((result) => {
+            if (result.data.success) {
                 toast.success(result.data.message);
-                this.setState({status: false});
+                this.setState({ status: false });
             } else {
                 toast.error(result.data.message);
             }
-        }).catch((error)=>{
-           toast.error("Error while updating the status.")
+        }).catch((error) => {
+            toast.error("Error while updating the status.")
         });
     }
 
@@ -324,13 +342,57 @@ class AssignmentPage extends React.Component {
         );
     }
 
+
+    accept1(orderId) {
+        this.acceptAssignment(orderId);
+    }
+
+    reject1() {
+        return;
+    }
+
+    confirm1(orderId) {
+        const accept = () => {
+            this.accept1(orderId);
+        }
+
+        confirmDialog({
+            message: 'Are you sure you want to update this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: accept,
+            reject: this.reject1
+        });
+    }
+
+    accept2(orderId) {
+        this.reject2(orderId);
+    }
+
+    reject2() {
+        return;
+    }
+
+    confirm2(orderId) {
+        const accept = () => {
+            this.accept2(orderId);
+        }
+
+        confirmDialog({
+            message: 'Are you sure you want to remove this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: accept,
+            reject: this.reject2
+        });
+    }
+
     render() {
         const openCloseButton = () => {
-            if (!this.state.status)
-            {
-                return (<div><Button label="Start Accepting New Assignments" style={{'marginTop': '50px'}} onClick={()=>{this.open()}}/></div>);
+            if (!this.state.status) {
+                return (<div><Button label="Start Accepting New Assignments" style={{ 'marginTop': '50px' }} onClick={() => { this.open() }} /></div>);
             } else {
-                return (<div><Button label="Stop Accepting New Assignments" style={{'marginTop': '50px'}} onClick={()=>{this.close()}}/></div>);
+                return (<div><Button label="Stop Accepting New Assignments" style={{ 'marginTop': '50px' }} onClick={() => { this.close() }} /></div>);
             }
         }
 

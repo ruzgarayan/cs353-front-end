@@ -18,6 +18,7 @@ import firebase from "../../firebase/firebase"
 import FileUploader from "react-firebase-file-uploader";
 import { Card } from 'primereact/card';
 import { InputSwitch } from 'primereact/inputswitch';
+import { confirmDialog } from 'primereact/confirmdialog';
 
 class ModifyMenuItemDialog extends React.Component {
     constructor(props) {
@@ -33,6 +34,10 @@ class ModifyMenuItemDialog extends React.Component {
             imageProgress: 0,
             imageLoading: false,
         };
+
+        this.accept2 = this.accept2.bind(this);
+        this.reject2 = this.reject2.bind(this);
+        this.confirm2 = this.confirm2.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -153,11 +158,11 @@ class ModifyMenuItemDialog extends React.Component {
                                 }} />
                             </div>
                             <div className="p-field p-col">
-                                <Button icon="pi pi-shopping-cart" className="p-button-danger" label="Remove" onClick={() => {
+                                <Button icon="pi pi-times" className="p-button-danger" label="Remove" onClick={() => {
+
                                     const ingredients = this.state.ingredients;
                                     ingredients.splice(index, 1);
                                     this.setState({ ingredients: ingredients });
-
                                 }}></Button>
                             </div>
                         </div>
@@ -175,6 +180,24 @@ class ModifyMenuItemDialog extends React.Component {
                 ))}
             </Card>
         );
+    }
+
+    accept2() {
+        this.updateMenuItem();
+    }
+
+    reject2() {
+        return;
+    }
+
+    confirm2() {
+        confirmDialog({
+            message: 'Are you sure you want to update this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: this.accept2,
+            reject: this.reject2
+        });
     }
 
     render() {
@@ -288,9 +311,9 @@ class ModifyMenuItemDialog extends React.Component {
                             </div>
 
 
-                            <div style={{'width': '100%'}}>
-                                <div style={{'textAlign': 'center' }}>
-                                <Button label="Apply Modifications" onClick={() => { this.updateMenuItem() }} />
+                            <div style={{ 'width': '100%' }}>
+                                <div style={{ 'textAlign': 'center' }}>
+                                    <Button label="Apply Modifications" onClick={this.confirm2} />
                                 </div>
                             </div>
                         </div>

@@ -21,7 +21,7 @@ class RestaurantMenuBar extends React.Component {
             },
             {
                 label: 'Finalized Orders',
-                icon: 'pi pi-fw pi-user',
+                icon: 'pi pi-fw pi-sitemap',
                 command: () => { this.props.history.push('/restaurant/finalizedOrders'); }
             },
             {

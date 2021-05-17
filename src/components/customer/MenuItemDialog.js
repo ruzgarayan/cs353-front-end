@@ -12,7 +12,8 @@ import { SelectButton } from 'primereact/selectbutton';
 import { toast } from "react-toastify";
 import store from './../../reducers/index.js'
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router'
+import { withRouter } from 'react-router';
+import {confirmDialog} from 'primereact/confirmdialog';
 
 class MenuItemDialog extends React.Component {
     constructor(props) {
@@ -27,6 +28,13 @@ class MenuItemDialog extends React.Component {
             alreadyInCart: false,
             fetching: false
         };
+        
+        this.accept1 = this.accept1.bind(this);
+        this.reject1 = this.reject1.bind(this);
+        this.confirm1 = this.confirm1.bind(this);
+        this.accept2 = this.accept2.bind(this);
+        this.reject2 = this.reject2.bind(this);
+        this.confirm2 = this.confirm2.bind(this);
     }
 
     componentDidUpdate(prevProps) {
@@ -204,6 +212,42 @@ class MenuItemDialog extends React.Component {
         this.props.hideDialog();
     }
 
+    accept1() {
+        this.updateCartItem();
+    }
+
+    reject1() {
+        return;
+    }
+
+    confirm1() {
+        confirmDialog({
+            message: 'Are you sure you want to update this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: this.accept1,
+            reject: this.reject1
+        });
+    }
+
+    accept2() {
+        this.removeCartItem();
+    }
+
+    reject2() {
+        return;
+    }
+
+    confirm2() {
+        confirmDialog({
+            message: 'Are you sure you want to remove this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: this.accept2,
+            reject: this.reject2
+        });
+    }
+
     render() {
         let menuItem = this.props.chosenMenuItem;
         let visible = this.props.visible;
@@ -239,8 +283,8 @@ class MenuItemDialog extends React.Component {
                 if (this.state.alreadyInCart)
                     return (
                         <span>
-                            <Button icon="pi pi-pencil" label="Update" className="p-button-success" onClick={() => this.updateCartItem()} style={{ 'marginTop': '10px', 'marginLeft': '20px' }} />
-                            <Button icon="pi pi-trash" label="Remove" className="p-button-danger" onClick={() => this.removeCartItem()} style={{ 'marginTop': '5px', 'marginLeft': '20px' }} />
+                            <Button icon="pi pi-pencil" label="Update" className="p-button-success" onClick={this.confirm1} style={{ 'marginTop': '10px', 'marginLeft': '20px' }} />
+                            <Button icon="pi pi-trash" label="Remove" className="p-button-danger" onClick={this.confirm2} style={{ 'marginTop': '5px', 'marginLeft': '20px' }} />
                         </span>
 
                     );

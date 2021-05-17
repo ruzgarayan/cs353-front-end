@@ -18,6 +18,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import MenuItemDialog from './MenuItemDialog';
 import { InputSwitch } from 'primereact/inputswitch';
+import {confirmDialog} from 'primereact/confirmdialog';
 
 class FinalizeOrderPage extends React.Component {
 
@@ -29,6 +30,14 @@ class FinalizeOrderPage extends React.Component {
         optionalDeliveryTime: null,
         couponInput: ""
     };
+
+    constructor(props) {
+        super(props);
+
+        this.accept1 = this.accept1.bind(this);
+        this.reject1 = this.reject1.bind(this);
+        this.confirm1 = this.confirm1.bind(this);
+    }
 
     showMenuItemDialog(chosenMenuItem) {
         this.setState({ chosenMenuItem: chosenMenuItem, displayDialog: true });
@@ -216,6 +225,24 @@ class FinalizeOrderPage extends React.Component {
         store.dispatch(removeCouponAction());
     }
 
+    accept1() {
+        this.makeOrder();
+    }
+
+    reject1() {
+        return;
+    }
+
+    confirm1() {
+        confirmDialog({
+            message: 'Are you sure you want to make the order?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: this.accept1,
+            reject: this.reject1
+        });
+    }
+
     render() {
         const itemList = this.renderItemList();
         const totalPrice = this.props.cartInfo.totalPrice;
@@ -297,7 +324,7 @@ class FinalizeOrderPage extends React.Component {
                         <div className="p-field p-col-12 p-md-3" >
                             <h1>Total is {totalPrice}$ </h1>
                             <div className="p-field p-grid">
-                                <Button label="Confirm the Order" onClick={() => { this.makeOrder() }} />
+                                <Button label="Confirm the Order" onClick={this.confirm1} />
                             </div>
                         </div>
                     </div>

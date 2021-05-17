@@ -12,6 +12,7 @@ import { DataView } from 'primereact/dataview';
 import React from 'react';
 import AddMenuItemDialog from './AddMenuItemDialog';
 import ModifyMenuItemDialog from './ModifyMenuItemDialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 
 
 class RestaurantModifyMenu extends React.Component {
@@ -23,6 +24,14 @@ class RestaurantModifyMenu extends React.Component {
         displayModifyDialog: false,
         chosenMenuItem: null
     };
+
+    constructor(props) {
+        super(props);
+
+        this.accept1 = this.accept1.bind(this);
+        this.reject1 = this.reject1.bind(this);
+        this.confirm1 = this.confirm1.bind(this);
+    }
 
     async fetchData() {
         const userId = this.props.loginInfo.userId;
@@ -69,7 +78,11 @@ class RestaurantModifyMenu extends React.Component {
     }
 
     renderCategoryMenus() {
+
         const renderListItem = (data) => {
+            const confirm = () => {
+                this.confirm1(data.menuItemId);
+            }
             return (
                 <div className="p-col-12">
                     <div className="product-list-item">
@@ -80,8 +93,8 @@ class RestaurantModifyMenu extends React.Component {
                         </div>
                         <div className="product-list-action">
                             <span className="product-price">${data.basePrice}</span>
-                            <Button icon="pi pi-shopping-cart" label="Modify" onClick={() => this.showModifyDialog(data)}></Button>
-                            <Button icon="pi pi-shopping-cart" className="p-button-danger" label="Remove" onClick={() => this.removeMenuItem(data.menuItemId)}></Button>
+                            <Button icon="pi pi-check " label="Modify" onClick={() => this.showModifyDialog(data)}></Button>
+                            <Button icon="pi pi-times" className="p-button-danger" label="Remove" onClick={confirm}></Button>
                         </div>
                     </div>
                 </div>
@@ -89,6 +102,11 @@ class RestaurantModifyMenu extends React.Component {
         }
 
         const renderGridItem = (data) => {
+
+            const confirm = () => {
+                this.confirm1(data.menuItemId);
+            }
+
             return (
                 <div className="p-col-12 p-md-4">
                     <div className="product-grid-item card">
@@ -102,7 +120,7 @@ class RestaurantModifyMenu extends React.Component {
                         <div className="product-grid-item-bottom">
                             <span className="product-price">${data.basePrice}</span>
                             <Button icon="pi pi-shopping-cart" label="Modify" onClick={() => this.showModifyDialog(data)}></Button>
-                            <Button icon="pi pi-shopping-cart" className="p-button-danger" label="Remove" onClick={() => this.removeMenuItem(data.menuItemId)}></Button>
+                            <Button icon="pi pi-shopping-cart" className="p-button-danger" label="Remove" onClick={confirm}></Button>
                         </div>
                     </div>
                 </div>
@@ -132,6 +150,26 @@ class RestaurantModifyMenu extends React.Component {
                 ))}
             </div>
         );
+    }
+
+    accept1(menuItemId) {
+        this.removeMenuItem(menuItemId)
+    }
+
+    reject1() {
+        return;
+    }
+
+    confirm1(menuItemId) {
+        const accept = () => { this.accept1(menuItemId) };
+
+        confirmDialog({
+            message: 'Are you sure you want to remove this item?',
+            header: 'Confirmation',
+            icon: 'pi pi-info-circle',
+            accept: accept,
+            reject: this.reject1
+        });
     }
 
     render() {
