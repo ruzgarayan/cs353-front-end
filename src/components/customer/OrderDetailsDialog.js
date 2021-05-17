@@ -126,14 +126,21 @@ class OrderDetailsDialog extends React.Component {
             const deliveryTimeLocale = new Date(orderData.order.deliveryTime).toLocaleTimeString();
             const deliveryDateLocale = new Date(orderData.order.deliveryTime).toLocaleDateString();
             const deliveryTimeFromNow = moment(deliveryTime).fromNow();
+
+            const orderTime = new Date(orderData.order.orderTime).toUTCString();
+            const orderTimeLocale = new Date(orderData.order.orderTime).toLocaleTimeString();
+            const orderDateLocale = new Date(orderData.order.orderTime).toLocaleDateString();
+            const orderTimeFromNow = moment(orderTime).fromNow();
+
+            const orderTimeText = (orderData.order.orderTime === null) ? "" : <div><h2>Ordered at: {orderDateLocale} {orderTimeLocale}, <br/> {orderTimeFromNow}</h2></div>;
             const deliveryTimeText = (orderData.order.deliveryTime === null) ? "" : <div><h2>Delivered at: {deliveryDateLocale} {deliveryTimeLocale}, <br/> {deliveryTimeFromNow}</h2></div>;
             const deliveryFeeText = (orderData.order.deliveryTime === null || orderData.order.deliveryFee === null || orderData.order.deliveryFee === 0) ? "" :
-             <div><h2>Delivery fee for the courier was: {orderData.order.deliveryFee} </h2></div>;
+             <div><h2>Delivery fee for the courier was: {orderData.order.deliveryFee}$ </h2></div>;
 
             const courierInfo = (orderData.order.courierNameSurname === null) ? "" : <div>
                 <img src={orderData.order.courierImage} alt="" style={{'width':'100%'}}
                     onError={(e) => { e.target.onerror = null; e.target.src = "https://st4.depositphotos.com/14953852/24787/v/600/depositphotos_247872612-stock-illustration-no-image-available-icon-vector.jpg" }} />
-                    <div> <h2>Courier: {orderData.order.courierNameSurname}$</h2> </div>
+                    <div> <h2>Courier: {orderData.order.courierNameSurname}</h2> </div>
             </div>
 
             return (
@@ -159,6 +166,7 @@ class OrderDetailsDialog extends React.Component {
                                     {couponText}
                                     <div><h2>Total price: {orderData.order.price}$</h2></div>
                                     <div><h2>Order status: {orderData.order.status}</h2></div>
+                                    {orderTimeText}
                                     {deliveryTimeText}
                                     {deliveryFeeText}
                                 </div></div>

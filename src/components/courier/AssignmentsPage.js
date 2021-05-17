@@ -14,6 +14,7 @@ import { DataView } from 'primereact/dataview';
 import { Rating } from 'primereact/rating';
 import moment from 'moment';
 import { Fieldset } from 'primereact/fieldset';
+import {confirmDialog} from 'primereact/confirmdialog';
 
 class AssignmentPage extends React.Component {
 
